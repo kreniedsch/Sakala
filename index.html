@@ -1,0 +1,1324 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090F">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sakala">
+<meta name="description" content="Sakala – Musiktheorie, Piano und Raga für Producer">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<title>Sakala</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px system-ui,sans-serif;overscroll-behavior-y:none}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<style>
+/* Layout: dark studio app (DAW look), single column, floating glass tab bar; every lesson gets a generated graphic.
+   Deliberately single dark theme. Track accent: --acc/--acc2 (violet = westlich, saffron = karnatisch). */
+:root{
+  color-scheme:dark;
+  --bg:#08090F; --bg2:#0F1120; --card:#141629; --card2:#1B1E36; --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+  --ink:#F3F3FA; --muted:#9598B4; --dim:#5F6283;
+  --w1:#9B8CFF; --w2:#4FC3FF; --k1:#FFB347; --k2:#FF6A4D;
+  --acc:var(--w1); --acc2:var(--w2);
+  --good:#43E39A; --bad:#FF6B7A;
+  --f-d:"Unbounded","Avenir Next",system-ui,sans-serif;
+  --f-b:"Manrope","Segoe UI",system-ui,sans-serif;
+  --f-m:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+.k{--acc:var(--k1);--acc2:var(--k2)}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-b);font-size:16px;line-height:1.55;-webkit-tap-highlight-color:transparent;
+  background:radial-gradient(900px 500px at 85% -10%,rgba(155,140,255,.16),transparent 60%),radial-gradient(700px 400px at -10% 30%,rgba(255,179,71,.08),transparent 60%),var(--bg);background-attachment:fixed}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:18px 120px}
+h1,h2,h3{font-family:var(--f-d);text-wrap:balance;margin:0;line-height:1.12;font-weight:700;letter-spacing:-.01em}
+h1{font-size:1.25rem}
+h2{font-size:1.3rem}
+h3{font-size:1rem}
+p{margin:0}
+b{font-weight:800}
+.muted{color:var(--muted)}
+.eyebrow{font-family:var(--f-m);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.between{justify-content:space-between}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.grad-text{background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* buttons & chips */
+.btn{border:1px solid var(--line2);background:rgba(255,255,255,.04);border-radius:999px;padding:9px 15px;font-weight:700;font-size:.88rem;display:inline-flex;align-items:center;gap:8px;transition:transform .1s,background .2s}
+.btn:hover{background:rgba(255,255,255,.08)}
+.btn:active{transform:scale(.97)}
+.btn.primary{border:0;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0A0B14;box-shadow:0 8px 24px -8px var(--acc)}
+.btn .ic{width:16px;height:16px}
+.chip{border:1px solid var(--line2);background:rgba(255,255,255,.03);border-radius:12px;padding:8px 12px;font-weight:700;font-size:.85rem;display:inline-flex;gap:8px;align-items:center}
+.chip .dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0A0B14}
+.chip .dot svg{width:10px;height:10px}
+select{font:inherit;font-size:.9rem;font-weight:600;background:var(--card2);color:var(--ink);border:1px solid var(--line2);border-radius:12px;padding:9px 12px;max-width:100%;width:100%}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:.7rem;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;min-width:0}
+.seg{display:inline-flex;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:999px;padding:7px 13px;font-weight:700;font-size:.82rem;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0A0B14}
+
+/* surfaces */
+.card{background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.glow{position:relative}
+.glow::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;background:linear-gradient(135deg,var(--acc),transparent 40%,transparent 60%,var(--acc2));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+
+/* header */
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.logo{display:flex;align-items:center;gap:11px}
+.logo svg{width:38px;height:38px}
+.logo small{display:block;font-family:var(--f-m);font-size:.6rem;color:var(--muted);letter-spacing:.14em;margin-top:3px}
+.streak{font-family:var(--f-m);font-size:.75rem;font-weight:700;color:var(--muted);display:flex;gap:6px;align-items:center;border:1px solid var(--line);padding:6px 10px;border-radius:999px}
+
+/* hero */
+.hero{position:relative;overflow:hidden;border-radius:28px;border:1px solid var(--line2);background:linear-gradient(140deg,#1C1840,#0F1120 55%,#2A160B);min-height:236px;display:flex;flex-direction:column;justify-content:space-between;padding:20px}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.9}
+.hero > *:not(canvas){position:relative}
+.hero-title{font-family:var(--f-d);font-size:1.7rem;font-weight:800;line-height:1.05;max-width:12ch}
+.hero-bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ring{width:84px;height:84px;flex:none}
+.ring text{font-family:var(--f-d);font-weight:700;fill:var(--ink)}
+.memo-day{background:rgba(8,9,15,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line2);border-radius:18px;padding:12px 14px;max-width:100%;flex:1 1 220px}
+.memo-day p{font-weight:700;font-size:.95rem;line-height:1.35;margin-top:4px}
+
+/* lesson rails */
+.rail-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}
+.rail-h h2{display:flex;align-items:center;gap:10px}
+.rail-h h2 i{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 0 14px var(--acc)}
+.rail{display:grid;align-items:start;grid-auto-flow:column;grid-auto-columns:min(70%,250px);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:6px;margin-inline:-16px;padding-inline:16px;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.lcard{scroll-snap-align:start;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:22px;padding:0;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,border-color .2s}
+.lcard:hover{transform:translateY(-2px);border-color:var(--line2)}
+.lcard .cover{aspect-ratio:16/10;background:radial-gradient(120% 100% at 100% 0%,color-mix(in srgb,var(--acc) 38%,transparent),transparent 60%),radial-gradient(90% 90% at 0% 100%,color-mix(in srgb,var(--acc2) 30%,transparent),transparent 60%),var(--bg2);display:grid;place-items:center;position:relative}
+.lcard .cover svg{width:86%;height:auto;max-height:84%}
+.lcard .meta{padding:12px 14px 14px;display:flex;flex-direction:column;gap:3px}
+.lcard .t{font-family:var(--f-d);font-weight:700;font-size:.92rem;line-height:1.2}
+.lcard .s{font-size:.8rem;color:var(--muted);line-height:1.35}
+.lcard .no{position:absolute;top:10px;left:12px;font-family:var(--f-m);font-weight:700;font-size:.7rem;color:var(--ink);background:rgba(8,9,15,.55);padding:3px 8px;border-radius:99px;backdrop-filter:blur(6px)}
+.lcard .ok{position:absolute;top:10px;right:12px;width:24px;height:24px;border-radius:50%;background:var(--good);color:#06210f;display:grid;place-items:center;font-weight:800;font-size:.8rem;box-shadow:0 0 12px rgba(67,227,154,.6)}
+
+/* lesson detail */
+.back{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:999px;padding:7px 13px;color:var(--muted);font-weight:700;font-size:.85rem;align-self:flex-start}
+.lhero{border-radius:28px;overflow:hidden;border:1px solid var(--line2);position:relative;background:radial-gradient(120% 120% at 100% 0%,color-mix(in srgb,var(--acc) 45%,transparent),transparent 55%),radial-gradient(100% 100% at 0% 100%,color-mix(in srgb,var(--acc2) 35%,transparent),transparent 60%),var(--bg2);padding:20px;display:grid;gap:10px}
+.lhero .art{display:grid;place-items:center;min-height:150px}
+.lhero .art svg{width:100%;max-width:340px;height:auto}
+.lhero h2{font-size:1.65rem;font-weight:800}
+.prose{display:flex;flex-direction:column;gap:12px;max-width:62ch;font-size:1rem}
+.prose ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:6px}
+.prose li::marker{color:var(--acc)}
+.tag{display:inline-block;font-family:var(--f-m);font-size:.8rem;font-weight:700;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.07);color:var(--acc)}
+.formula{font-family:var(--f-m);font-weight:700;font-size:1rem;letter-spacing:.04em;color:var(--acc)}
+.memo{border-radius:22px;padding:18px;background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 22%,var(--card)),color-mix(in srgb,var(--acc2) 14%,var(--card)));border:1px solid color-mix(in srgb,var(--acc) 45%,transparent);display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start}
+.memo .bulb{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;color:#0A0B14;box-shadow:0 0 22px -4px var(--acc)}
+.memo .bulb svg{width:22px;height:22px}
+.memo p{font-family:var(--f-d);font-weight:600;font-size:1rem;line-height:1.38;margin-top:4px}
+.memo p.sm{font-family:var(--f-b);font-size:.92rem;font-weight:600;color:var(--ink);opacity:.85}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.02)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:800}
+td.n{font-family:var(--f-m);font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--acc);font-weight:700}
+.fig{display:grid;place-items:center}
+.fig svg{width:100%;height:auto;max-width:560px}
+.figcap{font-size:.82rem;color:var(--muted);text-align:center}
+
+/* intervals list */
+.ivl{display:grid;gap:6px}
+.ivl button{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.025);border-radius:14px;padding:8px 10px}
+.ivl button:hover{border-color:var(--line2)}
+.ivl .ht{font-family:var(--f-m);font-weight:800;color:var(--acc);font-size:.95rem;text-align:center}
+.ivl .nm{font-weight:800;font-size:.9rem;display:flex;justify-content:space-between;gap:8px}
+.ivl .sg{font-size:.78rem;color:var(--muted)}
+.ivl .bar{height:5px;border-radius:9px;background:rgba(255,255,255,.06);margin-top:5px;overflow:hidden}
+.ivl .bar span{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.ivl button.play{border-color:var(--acc);box-shadow:0 0 18px -6px var(--acc)}
+
+/* quiz */
+.quiz .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{border:1px solid var(--line2);background:rgba(255,255,255,.03);border-radius:14px;padding:12px;font-weight:700;text-align:left;transition:background .2s}
+.opt:hover{background:rgba(255,255,255,.07)}
+.opt.right{border-color:var(--good);background:rgba(67,227,154,.14)}
+.opt.wrong{border-color:var(--bad);background:rgba(255,107,122,.12)}
+.fb{font-size:.92rem;font-weight:600}
+.fb.ok{color:var(--good)} .fb.no{color:var(--bad)}
+
+/* keyboard */
+.kbwrap{overflow-x:auto;border-radius:20px;padding:12px 10px 10px;background:linear-gradient(180deg,#1A1C2E,#0C0D16);border:1px solid var(--line2);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 20px 40px -24px rgba(0,0,0,.8);scrollbar-width:thin}
+.kbwrap::before{content:"";display:block;height:4px;border-radius:4px;margin:0 2px 8px;background:linear-gradient(90deg,var(--acc),var(--acc2));opacity:.75;box-shadow:0 0 14px var(--acc)}
+.kb{position:relative;display:flex;gap:3px;height:156px;min-width:500px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.key{position:relative;border:0;padding:0;display:flex;align-items:flex-end;justify-content:center;transition:background .12s,box-shadow .12s}
+.key.white{flex:1;background:linear-gradient(180deg,#E9EAF2 0%,#FFFFFF 70%,#F1F1F7 100%);border-radius:4px 4px 10px 10px;color:#6A6D85;box-shadow:inset 0 -6px 0 #D5D6E2}
+.key.black{position:absolute;top:0;height:60%;background:linear-gradient(180deg,#34364A 0%,#16172299 8%,#0B0B12 100%);border-radius:0 0 7px 7px;z-index:2;color:#C9CBE0;box-shadow:inset 0 -4px 0 #000,0 3px 6px rgba(0,0,0,.6)}
+.key .lbl{font-family:var(--f-m);font-size:9.5px;font-weight:700;margin-bottom:12px;pointer-events:none;line-height:1;text-align:center}
+.key.black .lbl{font-size:8.5px;margin-bottom:9px}
+.key.on .lbl{background:#0A0B14;color:#fff;padding:4px 5px;border-radius:7px;min-width:22px}
+.key.on.white{background:linear-gradient(180deg,#F3F2FF 0%,color-mix(in srgb,var(--acc) 55%,#fff) 100%);box-shadow:inset 0 -6px 0 color-mix(in srgb,var(--acc) 70%,#000),0 0 18px -4px var(--acc)}
+.key.on.black{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 85%,#fff),var(--acc));box-shadow:0 0 16px -2px var(--acc)}
+.key.on.black .lbl{background:#0A0B14}
+.key.root.white{background:linear-gradient(180deg,var(--acc2),var(--acc));box-shadow:inset 0 -6px 0 rgba(0,0,0,.25),0 0 22px -2px var(--acc)}
+.key.root.black{background:linear-gradient(180deg,var(--acc2),var(--acc))}
+.key.root .lbl{background:#fff;color:#0A0B14}
+.key.hit{filter:brightness(.85)}
+.key.hit::after{content:"";position:absolute;left:50%;top:22%;width:30px;height:30px;margin-left:-15px;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--acc2) 35%,transparent 70%);animation:pop .35s ease-out forwards;pointer-events:none}
+.key.black.hit::after{top:30%;width:22px;height:22px;margin-left:-11px}
+@keyframes pop{from{transform:scale(.4);opacity:1}to{transform:scale(1.6);opacity:0}}
+.hint{font-size:.78rem;color:var(--dim)}
+
+/* nav */
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:30;width:min(92vw,420px)}
+.nav-in{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:6px;border-radius:24px;background:rgba(20,22,41,.72);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);border:1px solid var(--line2);box-shadow:0 18px 40px -12px rgba(0,0,0,.8)}
+.nav button{background:none;border:0;border-radius:18px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;font-size:.66rem;font-weight:800;color:var(--muted);letter-spacing:.02em;transition:background .2s,color .2s}
+.nav button svg{width:21px;height:21px}
+.nav button[aria-current="page"]{color:#0A0B14;background:linear-gradient(135deg,var(--w1),var(--w2))}
+.nav button.kk[aria-current="page"]{background:linear-gradient(135deg,var(--k1),var(--k2))}
+
+/* piano */
+.viz{height:96px;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--bg2);position:relative}
+.viz canvas{width:100%;height:100%;display:block}
+.viz .now-title{position:absolute;left:14px;top:10px;font-family:var(--f-d);font-weight:700;font-size:1.05rem}
+.viz .now-sub{position:absolute;left:14px;bottom:10px;font-family:var(--f-m);font-size:.72rem;color:var(--muted)}
+.ctrls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.split{display:grid;grid-template-columns:minmax(0,180px) minmax(0,1fr);gap:16px;align-items:center}
+.notes-line{font-family:var(--f-m);font-size:.9rem;font-weight:700;word-break:break-word}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:800;padding:4px 10px;border-radius:99px;background:rgba(255,255,255,.06);border:1px solid var(--line2)}
+.pill.acc{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0A0B14;border:0}
+
+/* ear */
+.earstage{display:grid;place-items:center;padding:14px 0 4px;position:relative}
+.bigplay{width:128px;height:128px;border-radius:50%;border:0;background:radial-gradient(circle at 30% 30%,var(--acc2),var(--acc));color:#0A0B14;display:grid;place-items:center;position:relative;box-shadow:0 0 50px -8px var(--acc)}
+.bigplay svg{width:42px;height:42px;margin-left:6px}
+.bigplay::before,.bigplay::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:2px solid color-mix(in srgb,var(--acc) 50%,transparent);animation:ring 2.4s ease-out infinite}
+.bigplay::after{animation-delay:1.2s}
+@keyframes ring{from{transform:scale(.85);opacity:.9}to{transform:scale(1.35);opacity:0}}
+.score{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.score div{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:16px;padding:10px;text-align:center}
+.score b{display:block;font-family:var(--f-d);font-size:1.4rem;font-variant-numeric:tabular-nums}
+.score span{font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:800}
+.answers{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+
+/* talam */
+.dialwrap{display:grid;place-items:center}
+.dialwrap svg{width:100%;max-width:330px;height:auto}
+.dial-seg{transition:fill .1s}
+input[type=range]{width:100%;accent-color:var(--k1)}
+
+/* trainer */
+.trainer{display:flex;flex-direction:column;gap:12px;border-radius:20px;padding:16px;background:linear-gradient(135deg,rgba(67,227,154,.08),rgba(255,255,255,.02));border:1px solid var(--line2);transition:border-color .2s,box-shadow .2s}
+.trainer.good{border-color:var(--good);box-shadow:0 0 26px -6px var(--good)}
+.trainer.bad{border-color:var(--bad);box-shadow:0 0 26px -6px var(--bad)}
+.trainer.win .tr-big{background:linear-gradient(135deg,var(--good),#9BF5C9)}
+.tr-main{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center}
+.tr-big{min-width:84px;height:84px;padding:0 12px;border-radius:24px;display:grid;place-items:center;font-family:var(--f-d);font-weight:800;font-size:1.9rem;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0A0B14;transition:transform .15s}
+.trainer.good .tr-big{transform:scale(1.06)}
+.trainer.bad .tr-big{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.tr-sub{font-weight:800}
+.tr-prog{height:8px;border-radius:9px;background:rgba(255,255,255,.08);margin-top:10px;overflow:hidden}
+.tr-prog span{display:block;height:100%;width:0;border-radius:9px;background:linear-gradient(90deg,var(--good),#9BF5C9);transition:width .25s}
+.tr-live{font-family:var(--f-m);font-size:.72rem;font-weight:700;color:var(--muted);display:inline-flex;gap:6px;align-items:center}
+.tr-live i{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+.tr-live.on{color:var(--good)} .tr-live.on i{background:var(--good);box-shadow:0 0 10px var(--good);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.3}}
+.key.target::before{content:"";position:absolute;inset:3px;border:3px solid var(--good);border-radius:inherit;animation:blink .9s infinite;pointer-events:none;z-index:3}
+/* exercise grid */
+.ex-grid{display:flex;flex-wrap:wrap;gap:6px}
+.ex-av{display:flex;gap:3px;padding:4px;border-radius:12px;background:color-mix(in srgb,var(--acc) 10%,transparent)}
+.ex-cell{width:26px;height:28px;border-radius:7px;display:grid;place-items:center;font-family:var(--f-m);font-weight:700;font-size:.8rem;background:rgba(255,255,255,.07);transition:background .12s,transform .12s}
+.ex-cell.sa{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0A0B14}
+.ex-cell.hold{color:var(--dim);background:transparent}
+.ex-cell.cur{outline:2px solid var(--good);transform:translateY(-3px);background:rgba(67,227,154,.3);color:var(--ink)}
+/* inversions */
+.inv-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
+[hidden],.view[hidden]{display:none!important}
+#p-wheel{width:100%}
+#p-wheel svg{display:block;width:100%;height:auto;max-width:220px;margin:0 auto}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:440px){ .quiz .opts{grid-template-columns:1fr} .split{grid-template-columns:1fr} .split > :first-child{max-width:210px;margin:0 auto} .hero-title{font-size:1.45rem} .ctrls{grid-template-columns:1fr 1fr} }
+</style>
+
+<div class="wrap" id="app">
+  <header class="top">
+    <div class="logo">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9B8CFF"/><stop offset="1" stop-color="#FFB347"/></linearGradient></defs><rect width="40" height="40" rx="12" fill="url(#lg)"/><rect x="8" y="9" width="6" height="22" rx="2" fill="#0A0B14"/><rect x="17" y="9" width="6" height="22" rx="2" fill="#0A0B14"/><rect x="26" y="9" width="6" height="22" rx="2" fill="#0A0B14"/><rect x="12" y="9" width="4" height="13" rx="1.5" fill="#fff"/><rect x="24" y="9" width="4" height="13" rx="1.5" fill="#fff"/></svg>
+      <div><h1 style="font-size:1.45rem;font-weight:800;letter-spacing:-.02em">Sakala</h1><small>SWARA TRIFFT SKALA</small></div>
+    </div>
+    <div class="streak" id="hdr-prog"></div>
+  </header>
+
+  <section class="view" id="v-learn"></section>
+  <section class="view" id="v-lesson" hidden></section>
+
+  <!-- KLAVIER -->
+  <section class="view stack" id="v-piano" hidden>
+    <div class="row between"><h2>Klavier</h2>
+      <div class="seg" id="pmode" role="group" aria-label="Modus">
+        <button data-m="scale" aria-pressed="true">Skala</button>
+        <button data-m="chord" aria-pressed="false">Akkord</button>
+        <button data-m="raga" aria-pressed="false">Raga</button>
+      </div></div>
+    <div class="viz"><canvas id="viz-piano"></canvas><div class="now-title" id="p-title"></div><div class="now-sub" id="p-sub"></div></div>
+    <div class="kbwrap"><div class="kb" id="kb-piano"></div></div>
+    <div class="row">
+      <button class="btn primary" id="p-play"><svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>Abspielen</button>
+      <button class="btn" id="p-clear">Markierung aus</button>
+    </div>
+    <div id="p-trainer"></div>
+    <div class="ctrls">
+      <label class="f">Grundton / Sa<select id="p-root"></select></label>
+      <label class="f" id="p-scale-l">Skala<select id="p-scale"></select></label>
+      <label class="f" id="p-chord-l" hidden>Akkord<select id="p-chord"></select></label>
+      <label class="f" id="p-raga-l" hidden>Melakarta 1–72<select id="p-raga"></select></label>
+      <label class="f" style="grid-column:1/-1">Beschriftung<select id="p-label">
+        <option value="intl">International (C D E … B)</option>
+        <option value="de">Deutsch (C D E … H)</option>
+        <option value="solf">Do Re Mi</option>
+        <option value="swara">Swara (Sa Ri Ga)</option>
+      </select></label>
+    </div>
+    <div class="card"><div class="split"><div id="p-wheel"></div><div class="stack" style="gap:10px" id="p-info"></div></div><div id="p-steps"></div></div>
+    <p class="hint">Kein Ton auf dem iPhone? Stummschalter an der Seite prüfen.</p>
+  </section>
+
+  <!-- GEHÖR -->
+  <section class="view stack" id="v-ear" hidden>
+    <div class="row between"><h2>Gehör</h2>
+      <div class="seg" id="emode" role="group" aria-label="Übung">
+        <button data-m="int" aria-pressed="true">Intervalle</button>
+        <button data-m="chord" aria-pressed="false">Akkorde</button>
+        <button data-m="scale" aria-pressed="false">Skala/Raga</button>
+      </div></div>
+    <div class="card glow">
+      <div class="row between"><span class="eyebrow">Stufe</span>
+        <div class="seg" id="elev" role="group" aria-label="Stufe"><button data-l="easy" aria-pressed="true">Einsteiger</button><button data-l="all" aria-pressed="false">Alle</button></div></div>
+      <div class="earstage"><button class="bigplay" id="e-new" aria-label="Neue Frage abspielen"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></button></div>
+      <div class="row" style="justify-content:center"><button class="btn" id="e-again">↻ Nochmals hören</button><button class="btn" id="e-next">Nächste Frage →</button></div>
+      <p class="fb" id="e-fb" aria-live="polite" style="text-align:center">Tippe auf Play und hör genau hin.</p>
+      <div class="answers" id="e-ans"></div>
+      <div class="score"><div><b id="e-streak">0</b><span>In Folge</span></div><div><b id="e-ok">0</b><span>Richtig</span></div><div><b id="e-rate">–</b><span>Quote</span></div></div>
+    </div>
+    <div class="kbwrap"><div class="kb" id="kb-ear"></div></div>
+  </section>
+
+  <!-- TALAM -->
+  <section class="view stack k" id="v-talam" hidden>
+    <div><span class="eyebrow">Rhythmus</span><h2 style="margin-top:4px">Adi Talam</h2></div>
+    <div class="card glow">
+      <div class="dialwrap" id="t-dial"></div>
+      <div class="row" style="justify-content:center"><button class="btn primary" id="t-go"><svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg><span>Start</span></button></div>
+    </div>
+    <div class="card">
+      <label class="f"><span>Tempo · <span id="t-bpm-v">70</span> BPM</span><input type="range" id="t-bpm" min="40" max="140" value="70"></label>
+      <div class="row between"><span class="eyebrow">Geschwindigkeit</span>
+        <div class="seg" id="t-speed" role="group" aria-label="Geschwindigkeit"><button data-s="1" aria-pressed="true">1.</button><button data-s="2" aria-pressed="false">2.</button><button data-s="4" aria-pressed="false">3.</button></div></div>
+      <label class="f">Mitspielen<select id="t-sarali"><option value="">Nur Klatschen</option></select></label>
+    </div>
+    <div class="kbwrap"><div class="kb" id="kb-talam"></div></div>
+    <p class="hint">Sa liegt auf C. 1 Zyklus Adi Talam = 8 Viertel = 2 Takte im 4/4.</p>
+  </section>
+</div>
+
+<nav class="nav" aria-label="Hauptnavigation"><div class="nav-in">
+  <button data-v="learn" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4z"/><path d="M7 9.5V15c0 1.5 2.5 3 5 3s5-1.5 5-3V9.5"/></svg>Lernen</button>
+  <button data-v="piano"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8.5 4v9M15.5 4v9M12 13v7" stroke-linecap="round"/></svg>Klavier</button>
+  <button data-v="ear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 12v0M8 8v8M12 5v14M16 9v6M20 11v2"/></svg>Gehör</button>
+  <button data-v="talam" class="kk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 12l4-4"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>Talam</button>
+</div></nav>
+
+<script>
+/* ---------- Storage ---------- */
+const STORE='swara-skala-v1';
+let S={done:[],label:'intl'};
+try{const r=localStorage.getItem(STORE);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(S))}catch(e){}}
+const RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Audio ---------- */
+const A={ctx:null,out:null,an:null,last:0};
+function ac(){
+  if(!A.ctx){
+    const C=window.AudioContext||window.webkitAudioContext; if(!C) return null;
+    A.ctx=new C(); const comp=A.ctx.createDynamicsCompressor(); const g=A.ctx.createGain(); g.gain.value=.9;
+    A.an=A.ctx.createAnalyser(); A.an.fftSize=1024; A.an.smoothingTimeConstant=.82;
+    comp.connect(g); g.connect(A.an); A.an.connect(A.ctx.destination); A.out=comp;
+  }
+  if(A.ctx.state==='suspended') A.ctx.resume();
+  return A.ctx;
+}
+function tone(m,t,dur=1,vel=.55){
+  const c=ac(); if(!c) return; t=t??c.currentTime; A.last=performance.now()+Math.max(0,(t-c.currentTime)*1000);
+  const f=440*Math.pow(2,(m-69)/12);
+  const g=c.createGain(), lp=c.createBiquadFilter(); lp.type='lowpass';
+  lp.frequency.setValueAtTime(Math.min(9000,f*7),t); lp.frequency.exponentialRampToValueAtTime(Math.max(400,f*2),t+dur);
+  const o1=c.createOscillator(); o1.type='triangle'; o1.frequency.value=f;
+  const o2=c.createOscillator(); o2.type='sine'; o2.frequency.value=f*2;
+  const g2=c.createGain(); g2.gain.value=.22;
+  o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(lp); lp.connect(A.out);
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vel*.42,t+.006);
+  g.gain.exponentialRampToValueAtTime(vel*.16,t+.25); g.gain.exponentialRampToValueAtTime(.0008,t+dur+.4);
+  o1.start(t);o2.start(t);o1.stop(t+dur+.5);o2.stop(t+dur+.5);
+}
+/* Gleitender Ton für Gamakas: pts = [[sekunden, midi], ...] */
+function glide(pts,vel=.5){
+  const c=ac(); if(!c) return; const t0=c.currentTime+.05, end=pts[pts.length-1][0];
+  A.last=performance.now()+(end+.05)*1000;
+  const F=m=>440*Math.pow(2,(m-69)/12);
+  const g=c.createGain(), lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=3200;
+  const o1=c.createOscillator(); o1.type='triangle'; const o2=c.createOscillator(); o2.type='sine'; const g2=c.createGain(); g2.gain.value=.22;
+  o1.frequency.setValueAtTime(F(pts[0][1]),t0); o2.frequency.setValueAtTime(F(pts[0][1])*2,t0);
+  pts.slice(1).forEach(([t,m])=>{o1.frequency.linearRampToValueAtTime(F(m),t0+t);o2.frequency.linearRampToValueAtTime(F(m)*2,t0+t);});
+  o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(lp); lp.connect(A.out);
+  g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(vel*.4,t0+.02); g.gain.setValueAtTime(vel*.32,t0+Math.max(.03,end-.15)); g.gain.exponentialRampToValueAtTime(.0008,t0+end+.35);
+  o1.start(t0);o2.start(t0);o1.stop(t0+end+.4);o2.stop(t0+end+.4);
+}
+/* Tanpura-Drone: Pa – Sa – Sa – tiefes Sa */
+const Drone={timer:null,i:0,
+  get on(){return !!this.timer},
+  start(sa=48){ if(this.timer) return; const pat=[sa-5,sa,sa,sa-12]; this.i=0;
+    const pl=()=>{tone(pat[this.i%4],undefined,3.2,.34);this.i++;}; pl(); this.timer=setInterval(pl,650); },
+  stop(){ clearInterval(this.timer); this.timer=null; },
+  toggle(){ this.on?this.stop():this.start(); return this.on; }};
+/* Klick-Muster für Rhythmus/Solkattu: groups = [3,2,2] … */
+function clickPattern(groups,bpm=160,reps=2){
+  const c=ac(); if(!c) return; stopSeq(); const sp=60/bpm; let t=c.currentTime+.08;
+  for(let r=0;r<reps;r++) groups.forEach((g,gi)=>{for(let k=0;k<g;k++){click(t,k===0); if(k===0&&gi===0) tone(48,t,.3,.4); t+=sp;}});
+  A.last=performance.now()+(t-c.currentTime)*1000;
+}
+function subdivDemo(sub,bpm=80,beats=8){
+  const c=ac(); if(!c) return; stopSeq(); const sp=60/bpm; let t=c.currentTime+.08;
+  for(let b=0;b<beats;b++){ tone(b%4===0?48:55,t,.25,.35); for(let k=0;k<sub;k++) click(t+k*sp/sub,k===0); t+=sp; }
+}
+function click(t,accent){
+  const c=ac(); if(!c) return;
+  const o=c.createOscillator(),g=c.createGain(); o.type='square'; o.frequency.value=accent?1500:950;
+  o.connect(g); g.connect(A.out);
+  g.gain.setValueAtTime(accent?.32:.16,t); g.gain.exponentialRampToValueAtTime(.0005,t+.05);
+  o.start(t); o.stop(t+.06);
+}
+
+/* ---------- Visualizer (canvas) ---------- */
+function Visualizer(canvas,{bars=48,colors=['#9B8CFF','#4FC3FF']}={}){
+  const ctx=canvas.getContext('2d'); let raf=0, ph=0; const data=new Uint8Array(512);
+  function size(){const r=canvas.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);canvas.width=Math.max(1,r.width*d);canvas.height=Math.max(1,r.height*d);}
+  function frame(){
+    if(!canvas.isConnected) return; if(canvas.offsetParent===null){raf=requestAnimationFrame(frame);return;}
+    if(canvas.width<2) size();
+    const W=canvas.width,H=canvas.height; ctx.clearRect(0,0,W,H);
+    const live=A.an&&performance.now()-A.last<2600; if(live) A.an.getByteFrequencyData(data);
+    const g=ctx.createLinearGradient(0,0,W,0); g.addColorStop(0,colors[0]); g.addColorStop(1,colors[1]);
+    ctx.fillStyle=g; const bw=W/bars;
+    for(let i=0;i<bars;i++){
+      const idle=(Math.sin(ph+i*.35)*.5+.5)*.14+.04;
+      const v=live?Math.max(idle,data[Math.floor(4+i*(160/bars))]/255):idle;
+      const h=v*H*.82, x=i*bw+bw*.22, w=bw*.56;
+      ctx.globalAlpha=.25+v*.75; const rr=Math.min(w/2,6);
+      ctx.beginPath(); ctx.roundRect?ctx.roundRect(x,H-h,w,h,rr):ctx.rect(x,H-h,w,h); ctx.fill();
+    }
+    ctx.globalAlpha=1; if(!RM) ph+=.035; raf=requestAnimationFrame(frame);
+  }
+  addEventListener('resize',size); size(); frame(); return {size,setColors(c){colors=c}};
+}
+
+/* ---------- Theory data ---------- */
+const NAMES={
+  intl:['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'],
+  de:['C','Cis','D','Dis','E','F','Fis','G','Gis','A','B','H'],
+  solf:['Do','Do♯','Re','Re♯','Mi','Fa','Fa♯','Sol','Sol♯','La','La♯','Si'],
+};
+const SW12=['S','R1','R2','G2','G3','M1','M2','P','D1','D2','N2','N3'];
+const SCALES={
+  'Dur (Ionisch)':[0,2,4,5,7,9,11],
+  'Natürliches Moll (Äolisch)':[0,2,3,5,7,8,10],
+  'Harmonisches Moll':[0,2,3,5,7,8,11],
+  'Melodisches Moll':[0,2,3,5,7,9,11],
+  'Dorisch':[0,2,3,5,7,9,10],
+  'Phrygisch':[0,1,3,5,7,8,10],
+  'Lydisch':[0,2,4,6,7,9,11],
+  'Mixolydisch':[0,2,4,5,7,9,10],
+  'Lokrisch':[0,1,3,5,6,8,10],
+  'Doppelharmonisch Dur':[0,1,4,5,7,8,11],
+  'Dur-Pentatonik':[0,2,4,7,9],
+  'Moll-Pentatonik':[0,3,5,7,10],
+  'Blues':[0,3,5,6,7,10],
+};
+const SCALE_NOTE={
+  'Dur (Ionisch)':'Fröhlich, hell. Grundlage fast jeder Popmusik. Karnatisch: Shankarabharanam (29).',
+  'Natürliches Moll (Äolisch)':'Traurig, ernst. Standard für Trap, R&B und viele Balladen. Karnatisch: Natabhairavi (20).',
+  'Harmonisches Moll':'Moll mit grosser Septime. Dramatisch und orientalisch. Karnatisch: Kiravani (21).',
+  'Melodisches Moll':'Moll mit grosser Sexte und Septime (aufwärts). Jazz und Filmmusik. Karnatisch: Gourimanohari (23).',
+  'Dorisch':'Moll mit grosser Sexte, warm statt traurig. Lo-Fi, Funk, Neo-Soul. Karnatisch: Kharaharapriya (22).',
+  'Phrygisch':'Moll mit kleiner Sekunde, dunkel und spannend. Drill, Flamenco. Karnatisch: Hanumatodi (8).',
+  'Lydisch':'Dur mit übermässiger Quarte, verträumt. Filmmusik. Karnatisch: Mechakalyani (65).',
+  'Mixolydisch':'Dur mit kleiner Septime. Rock, Funk, Blues-Feeling. Karnatisch: Harikambhoji (28).',
+  'Lokrisch':'Instabil, sehr dunkel. Selten als Grundtonart.',
+  'Doppelharmonisch Dur':'Orientalischer Klang mit zwei Halbtonschritten. Karnatisch: Mayamalavagowla (15).',
+  'Dur-Pentatonik':'5 Töne, klingt immer «richtig». Ideal für Hooks. Karnatisch: Mohanam.',
+  'Moll-Pentatonik':'5 Töne, die Basis für Melodien in Moll.',
+  'Blues':'Moll-Pentatonik plus «Blue Note» (verminderte Quinte).',
+};
+const CHORDS={'Dur':[0,4,7],'Moll':[0,3,7],'Vermindert':[0,3,6],'Übermässig':[0,4,8],'Sus2':[0,2,7],'Sus4':[0,5,7],'Maj7':[0,4,7,11],'Moll7':[0,3,7,10],'Dominant 7':[0,4,7,10]};
+const CHORD_NOTE={'Dur':'4 + 3 Halbtöne. Hell und stabil.','Moll':'3 + 4 Halbtöne. Dunkler, emotional.','Vermindert':'3 + 3 Halbtöne. Angespannt, will sich auflösen.','Übermässig':'4 + 4 Halbtöne. Schwebend, unheimlich.','Sus2':'Terz ersetzt durch Sekunde. Offen, weder Dur noch Moll.','Sus4':'Terz ersetzt durch Quarte. Spannung vor der Auflösung.','Maj7':'Dur plus grosse Septime. Weich, jazzig, R&B.','Moll7':'Moll plus kleine Septime. Lo-Fi- und Neo-Soul-Klassiker.','Dominant 7':'Dur plus kleine Septime. Will zur Tonika zurück.'};
+
+const SW_OFF={R1:1,R2:2,R3:3,G1:2,G2:3,G3:4,M1:5,M2:6,D1:8,D2:9,D3:10,N1:9,N2:10,N3:11};
+const RG=[['R1','G1'],['R1','G2'],['R1','G3'],['R2','G2'],['R2','G3'],['R3','G3']];
+const DN=[['D1','N1'],['D1','N2'],['D1','N3'],['D2','N2'],['D2','N3'],['D3','N3']];
+const CHAKRA=['Indu (Mond = 1)','Netra (Augen = 2)','Agni (Feuer = 3)','Veda (Veden = 4)','Bana (Pfeile = 5)','Rutu (Jahreszeiten = 6)','Rishi (Weise = 7)','Vasu (Vasus = 8)','Brahma (= 9)','Disi (Himmelsrichtungen = 10)','Rudra (= 11)','Aditya (Sonnen = 12)'];
+const MELA_NAMES={1:'Kanakangi',8:'Hanumatodi',15:'Mayamalavagowla',16:'Chakravakam',20:'Natabhairavi',21:'Kiravani',22:'Kharaharapriya',23:'Gourimanohari',26:'Charukesi',28:'Harikambhoji',29:'Dheerasankarabharanam',36:'Chalanata',45:'Shubhapantuvarali',51:'Kamavardhani (Pantuvarali)',57:'Simhendramadhyamam',64:'Vachaspati',65:'Mechakalyani',72:'Rasikapriya'};
+function mela(n){
+  const m=n>36?'M2':'M1'; const k=(n-1)%36; const rg=RG[Math.floor(k/6)], dn=DN[k%6];
+  return {n,sw:['S',rg[0],rg[1],m,'P',dn[0],dn[1]],off:[0,SW_OFF[rg[0]],SW_OFF[rg[1]],SW_OFF[m],7,SW_OFF[dn[0]],SW_OFF[dn[1]]],chakra:CHAKRA[Math.floor((n-1)/6)],name:MELA_NAMES[n]||null};
+}
+const JANYA={'Mohanam (Janya)':{sw:['S','R2','G3','P','D2'],off:[0,2,4,7,9],note:'Pentatonischer Raga aus Harikambhoji (28). Entspricht der Dur-Pentatonik.'},
+ 'Hindolam (Janya)':{sw:['S','G2','M1','D1','N2'],off:[0,3,5,8,10],note:'Pentatonisch aus Natabhairavi (20). Ohne Ri und Pa, ernst und meditativ. Hindustani: Malkauns.'},
+ 'Abhogi (Janya)':{sw:['S','R2','G2','M1','D2'],off:[0,2,3,5,9],note:'Pentatonisch aus Kharaharapriya (22). Ohne Pa und Ni, sanft und andächtig.'},'Hamsadhwani (Janya)':{sw:['S','R2','G3','P','N3'],off:[0,2,4,7,11],note:'Pentatonisch aus Shankarabharanam (29). Hell und festlich, typischer Konzert-Opener.'}};
+function westernMatch(off){for(const [k,v] of Object.entries(SCALES)) if(v.length===off.length&&v.every((x,i)=>x===off[i])) return k; return null;}
+
+const MMG={S:0,R:1,G:4,M:5,P:7,D:8,N:11,"Ṡ":12};
+/* Traditionelle Übungen (Purandara Dasa), Nummerierung nach karnatik.com. "," = Ton halten (Karvai). */
+const SARALI=[
+ 'S R G M P D N Ṡ | Ṡ N D P M G R S',
+ 'S R S R S R G M | S R G M P D N Ṡ | Ṡ N Ṡ N Ṡ N D P | Ṡ N D P M G R S',
+ 'S R G S R G S R | S R G M P D N Ṡ | Ṡ N D Ṡ N D Ṡ N | Ṡ N D P M G R S',
+ 'S R G M S R G M | S R G M P D N Ṡ | Ṡ N D P Ṡ N D P | Ṡ N D P M G R S',
+ 'S R G M P , S R | S R G M P D N Ṡ | Ṡ N D P M , Ṡ N | Ṡ N D P M G R S',
+ 'S R G M P D S R | S R G M P D N Ṡ | Ṡ N D P M G Ṡ N | Ṡ N D P M G R S',
+ 'S R G M P D N , | S R G M P D N Ṡ | Ṡ N D P M G R , | Ṡ N D P M G R S',
+ 'S R G M P M G R | S R G M P D N Ṡ | Ṡ N D P M P D N | Ṡ N D P M G R S',
+ 'S R G M P M D P | S R G M P D N Ṡ | Ṡ N D P M P G M | Ṡ N D P M G R S',
+ 'S R G M P , G M | P , , , P , , , | G M P D N D P M | G M P G M G R S',
+ 'Ṡ , N D N , D P | D , P M P , P , | G M P D N D P M | G M P G M G R S',
+ 'Ṡ Ṡ N D N N D P | D D P M P , P , | G M P D N D P M | G M P G M G R S',
+ 'S R G R G , G M | P M P , D P D , | M P D P D N D P | M P D P M G R S',
+ 'S R G M P , P , | D D P , M M P , | D N Ṡ , Ṡ N D P | Ṡ N D P M G R S',
+];
+const JANTA1='S S R R G G M M | R R G G M M P P | G G M M P P D D | M M P P D D N N | P P D D N N Ṡ Ṡ | Ṡ Ṡ N N D D P P | N N D D P P M M | D D P P M M G G | P P M M G G R R | M M G G R R S S';
+const EX=SARALI.map((t,i)=>({id:'s'+(i+1),name:'Sarali Varisai '+(i+1),txt:t})).concat([{id:'j1',name:'Janta Varisai 1',txt:JANTA1}]);
+const exTokens=id=>EX.find(e=>e.id===id).txt.split(/\s+/).filter(x=>x!=='|');
+const exNotes=id=>exTokens(id).map(x=>x===','?null:60+MMG[x]);
+const saraliNotes=i=>exNotes('s'+(i+1));
+const MMG_NAMES={60:'S',61:'R',64:'G',65:'M',67:'P',68:'D',71:'N',72:'Ṡ'};
+const MMG_KEYS=[60,61,64,65,67,68,71,72];
+
+/* ---------- Pitch detection (Mikrofon) ---------- */
+function autoCorrelate(buf,sr){
+  let n=buf.length,rms=0; for(let i=0;i<n;i++) rms+=buf[i]*buf[i]; rms=Math.sqrt(rms/n); if(rms<.012) return [-1,rms];
+  let r1=0,r2=n-1; const th=.2;
+  for(let i=0;i<n/2;i++) if(Math.abs(buf[i])<th){r1=i;break;}
+  for(let i=1;i<n/2;i++) if(Math.abs(buf[n-i])<th){r2=n-i;break;}
+  const b=buf.slice(r1,r2); n=b.length; const maxLag=Math.min(n,Math.ceil(sr/55)); const c=new Float32Array(maxLag);
+  for(let l=0;l<maxLag;l++){let s=0; for(let j=0;j<n-l;j++) s+=b[j]*b[j+l]; c[l]=s;}
+  let d=0; while(d<maxLag-1&&c[d]>c[d+1]) d++;
+  let mv=-1,mp=-1; for(let i=d;i<maxLag;i++) if(c[i]>mv){mv=c[i];mp=i;}
+  if(mp<1||mp>=maxLag-1) return [-1,rms];
+  const x1=c[mp-1],x2=c[mp],x3=c[mp+1],a=(x1+x3-2*x2)/2,bb=(x3-x1)/2; const T=a?mp-bb/(2*a):mp;
+  return [sr/T,rms];
+}
+const Mic={stream:null,an:null,buf:null,raf:0,handler:null,live:null,fr:0,L:{pc:-1,n:0,reg:-1,regRms:0,dip:true},
+  async start(handler,live){
+    const c=ac(); if(!c) throw new Error('audio');
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia) throw new Error('unsupported');
+    if(!this.stream){
+      this.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+      const src=c.createMediaStreamSource(this.stream); this.an=c.createAnalyser(); this.an.fftSize=2048; src.connect(this.an); this.buf=new Float32Array(2048);
+    }
+    this.handler=handler; this.live=live; this.L={pc:-1,n:0,reg:-1,regRms:0,dip:true}; cancelAnimationFrame(this.raf); this.loop();
+  },
+  stop(){ cancelAnimationFrame(this.raf); this.handler=null; if(this.live) this.live(null); this.live=null; if(this.stream){this.stream.getTracks().forEach(t=>t.stop());this.stream=null;} },
+  get on(){return !!this.stream},
+  loop(){
+    this.raf=requestAnimationFrame(()=>this.loop()); if((++this.fr)%2) return;
+    if(performance.now()<A.last+450) return; /* eigene Wiedergabe ignorieren */
+    this.an.getFloatTimeDomainData(this.buf); const [f,rms]=autoCorrelate(this.buf,A.ctx.sampleRate); const L=this.L;
+    if(rms<.012||rms<L.regRms*.55) L.dip=true;
+    if(f<55||f>2100){L.n=0;return;}
+    const midi=Math.round(69+12*Math.log2(f/440)), pc=((midi%12)+12)%12;
+    if(this.live) this.live(midi);
+    if(pc===L.pc) L.n++; else {L.pc=pc;L.n=1;}
+    if(L.n===3&&(pc!==L.reg||L.dip)){L.reg=pc;L.regRms=rms;L.dip=false;if(this.handler) this.handler(midi);}
+  }};
+
+/* ---------- Mitspiel-Trainer ---------- */
+const MIC_SVG='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+function Trainer(el,{kb,source,onIndex=()=>{}}){
+  el.innerHTML=`<div class="trainer">
+    <div class="row between"><span class="eyebrow">Spiel mit</span><span class="tr-live" data-r="live"><i></i><span>Mikrofon aus</span></span></div>
+    <div class="tr-main"><div class="tr-big" data-r="big">♪</div><div style="min-width:0"><div class="tr-sub" data-r="sub">Die App zeigt dir Ton für Ton, was du spielen sollst.</div><div class="tr-prog"><span data-r="bar"></span></div></div></div>
+    <div class="row"><button class="btn primary" data-r="start"><svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>Start</button><button class="btn" data-r="mic">${MIC_SVG}<span>Mikrofon an</span></button></div>
+    <p class="hint" data-r="msg">Spiel die grün markierte Taste auf deinem Keyboard oder tippe sie hier an.</p></div>`;
+  const r=k=>el.querySelector(`[data-r="${k}"]`), box=el.querySelector('.trainer');
+  let seq=[],idx=0,active=false,errors=0,ft=0;
+  function flash(c){box.classList.remove('good','bad');void box.offsetWidth;box.classList.add(c);clearTimeout(ft);ft=setTimeout(()=>box.classList.remove(c),380);}
+  function render(){const t=seq[idx];r('big').textContent=t.label||NAMES.intl[t.m%12];r('sub').textContent=`Taste ${NAMES.intl[t.m%12]} · ${idx+1} von ${seq.length}`;r('bar').style.width=(idx/seq.length*100)+'%';kb.target(t.m);onIndex(t.i);}
+  function start(){const s=source();seq=s.notes.map((m,i)=>({m,label:s.labels[i],i})).filter(x=>x.m!=null);idx=0;errors=0;active=true;box.classList.remove('win');r('msg').textContent='Los gehts. Spiel die grün markierte Taste.';render();}
+  function reset(){active=false;kb.target(null);onIndex(-1);box.classList.remove('win');r('big').textContent='♪';r('sub').textContent='Die App zeigt dir Ton für Ton, was du spielen sollst.';r('bar').style.width='0';}
+  function input(m){
+    if(!active) return; const t=seq[idx];
+    if(((m%12)+12)%12===t.m%12){flash('good');idx++;
+      if(idx>=seq.length){active=false;kb.target(null);onIndex(-1);box.classList.add('win');r('big').textContent='✓';r('bar').style.width='100%';
+        r('sub').textContent=errors?`Geschafft mit ${errors} ${errors>1?'Fehlern':'Fehler'}`:'Perfekt, ohne Fehler!';r('msg').textContent='Tippe auf Start für eine neue Runde.';}
+      else{render();r('msg').textContent='Richtig!';}
+    } else {errors++;flash('bad');r('msg').textContent=`Das war ${NAMES.intl[((m%12)+12)%12]}. Gesucht ist ${NAMES.intl[t.m%12]}.`;}
+  }
+  kb.el.addEventListener('note',e=>input(e.detail));
+  r('start').onclick=start;
+  function setLive(on,txt){r('live').classList.toggle('on',on);r('live').lastChild.textContent=txt;r('mic').lastChild.textContent=on?'Mikrofon aus':'Mikrofon an';}
+  r('mic').onclick=async()=>{
+    if(Mic.on&&Mic.handler===input){Mic.stop();setLive(false,'Mikrofon aus');return;}
+    try{ await Mic.start(input,m=>{ if(m==null) setLive(false,'Mikrofon aus'); else setLive(true,'hört: '+NAMES.intl[((m%12)+12)%12]+(Math.floor(m/12)-1)); }); setLive(true,'hört zu …'); if(!active) start(); }
+    catch(e){ setLive(false,'Mikrofon gesperrt'); r('msg').innerHTML='<b>Mikrofon nicht verfügbar.</b> Im Claude-Fenster dürfen Apps nicht aufs Mikrofon zugreifen. Sobald die App als eigene Web-App auf deinem Homescreen läuft, funktioniert es. Bis dahin kannst du die Tasten hier antippen.'; }
+  };
+  return {reset,start};
+}
+const INTV=[[1,'kleine Sekunde','Der weisse Hai'],[2,'grosse Sekunde','Alle meine Entchen'],[3,'kleine Terz','Kuckuck, Kuckuck (abwärts)'],[4,'grosse Terz','Oh When the Saints'],[5,'Quarte','O Tannenbaum'],[6,'Tritonus','Die Simpsons'],[7,'Quinte','Star Wars'],[8,'kleine Sexte','The Entertainer (E zum hohen C)'],[9,'grosse Sexte','My Bonnie Is Over the Ocean'],[10,'kleine Septime','Star Trek (Originalserie)'],[11,'grosse Septime','Take On Me (Refrain)'],[12,'Oktave','Somewhere Over the Rainbow']];
+
+/* ---------- SVG graphics ---------- */
+let GID=0;
+const gradDefs=(id,a='var(--acc)',b='var(--acc2)')=>`<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:${a}"/><stop offset="1" style="stop-color:${b}"/></linearGradient></defs>`;
+/* Ton-Rad: 12 positions, polygon through the scale */
+function wheel(off,{labels=null,size=220,root=0,show='all'}={}){
+  const id='g'+(++GID), c=size/2, R=c-28, pts=[];
+  const lab=labels||NAMES.intl.map((_,i)=>NAMES.intl[(i+root)%12]);
+  let s=`<svg viewBox="0 0 ${size} ${size}" role="img" aria-label="Ton-Rad">${gradDefs(id)}`;
+  s+=`<circle cx="${c}" cy="${c}" r="${R}" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/><circle cx="${c}" cy="${c}" r="${R*.55}" fill="none" stroke="rgba(255,255,255,.05)"/>`;
+  for(let i=0;i<12;i++){const a=i/12*Math.PI*2-Math.PI/2; const x=c+R*Math.cos(a), y=c+R*Math.sin(a);
+    s+=`<line x1="${c}" y1="${c}" x2="${x}" y2="${y}" stroke="rgba(255,255,255,.04)"/>`; if(off.includes(i)) pts.push([x,y]);}
+  if(pts.length>2) s+=`<polygon points="${pts.map(p=>p.join(',')).join(' ')}" fill="url(#${id})" fill-opacity=".28" stroke="url(#${id})" stroke-width="2.2" stroke-linejoin="round"/>`;
+  for(let i=0;i<12;i++){const a=i/12*Math.PI*2-Math.PI/2; const on=off.includes(i);
+    const x=c+R*Math.cos(a), y=c+R*Math.sin(a), lx=c+(R+16)*Math.cos(a), ly=c+(R+16)*Math.sin(a);
+    s+=on?`<circle cx="${x}" cy="${y}" r="${i===0?7:5.5}" fill="${i===0?'#fff':`url(#${id})`}"/>`:`<circle cx="${x}" cy="${y}" r="2.5" fill="rgba(255,255,255,.2)"/>`;
+    if(show==='all'||on) s+=`<text x="${lx}" y="${ly+4}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10.5" font-weight="700" fill="${on?'#F3F3FA':'#5F6283'}">${lab[i]}</text>`;}
+  return s+`</svg>`;
+}
+/* step blocks: semitone distances as proportional blocks */
+function steps(off,{w=560,h=64,closed=true}={}){
+  const id='g'+(++GID); const st=(closed?off.concat(12):off).slice(1).map((x,i)=>x-off[i]);
+  const tot=st.reduce((a,b)=>a+b,0), gap=4, u=(w-gap*(st.length-1))/tot; let x=0, s=`<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Schritte">${gradDefs(id)}`;
+  st.forEach(d=>{const bw=d*u; const lab=d===1?'H':d===2?'G':d+'';
+    s+=`<rect x="${x}" y="8" width="${bw}" height="${h-16}" rx="10" fill="${d===1?'rgba(255,255,255,.1)':`url(#${id})`}" ${d===1?'stroke="rgba(255,255,255,.25)"':''}/>`;
+    s+=`<text x="${x+bw/2}" y="${h/2+6}" text-anchor="middle" font-family="Unbounded,sans-serif" font-weight="700" font-size="16" fill="${d===1?'#F3F3FA':'#0A0B14'}">${lab}</text>`; x+=bw+gap;});
+  return s+`</svg>`;
+}
+/* mini keyboard thumbnail */
+function miniKb(lit=[],root=null,{from=60,to=76}={}){
+  const id='g'+(++GID); const W=[],B=[]; for(let m=from;m<=to;m++)([0,2,4,5,7,9,11].includes(m%12)?W:B).push(m);
+  const kw=200/W.length; let s=`<svg viewBox="0 0 200 110" role="img" aria-label="Tastatur">${gradDefs(id)}`;
+  W.forEach((m,i)=>{const on=lit.includes(m); s+=`<rect x="${i*kw+1}" y="0" width="${kw-2}" height="108" rx="4" fill="${on?`url(#${id})`:'#ECEDF5'}"/>`; if(m===root) s+=`<circle cx="${i*kw+kw/2}" cy="92" r="4" fill="#0A0B14"/>`;});
+  B.forEach(m=>{const wi=W.indexOf(m-1); const on=lit.includes(m); s+=`<rect x="${(wi+1)*kw-kw*.3}" y="0" width="${kw*.6}" height="64" rx="3" fill="${on?`url(#${id})`:'#14151F'}"/>`;});
+  return s+`</svg>`;
+}
+function coverBars(){const id='g'+(++GID);let s=`<svg viewBox="0 0 200 110">${gradDefs(id)}`;INTV.forEach(([n],i)=>{const h=8+n*7.6;s+=`<rect x="${6+i*16}" y="${104-h}" width="11" height="${h}" rx="5" fill="url(#${id})" opacity="${.35+n/20}"/>`});return s+'</svg>';}
+function coverStack(){const id='g'+(++GID);let s=`<svg viewBox="0 0 200 110">${gradDefs(id)}`;[['G',0],['E',1],['C',2]].forEach(([n,i])=>{s+=`<rect x="44" y="${8+i*33}" width="112" height="27" rx="13" fill="url(#${id})" opacity="${1-i*.2}"/><text x="100" y="${27+i*33}" text-anchor="middle" font-family="Unbounded,sans-serif" font-weight="800" font-size="15" fill="#0A0B14">${n}</text>`});s+=`<text x="170" y="40" font-family="JetBrains Mono" font-size="11" font-weight="700" fill="#F3F3FA">+3</text><text x="170" y="73" font-family="JetBrains Mono" font-size="11" font-weight="700" fill="#F3F3FA">+4</text>`;return s+'</svg>';}
+function coverCircle(){const id='g'+(++GID);const maj=['C','G','D','A','E','H','Fis','Des','As','Es','B','F'];let s=`<svg viewBox="0 0 200 120">${gradDefs(id)}<circle cx="100" cy="60" r="50" fill="none" stroke="url(#${id})" stroke-width="2"/>`;maj.forEach((m,i)=>{const a=i/12*Math.PI*2-Math.PI/2;s+=`<circle cx="${100+50*Math.cos(a)}" cy="${60+50*Math.sin(a)}" r="9" fill="${i===0?'#fff':`url(#${id})`}"/><text x="${100+50*Math.cos(a)}" y="${60+50*Math.sin(a)+3.5}" text-anchor="middle" font-family="JetBrains Mono" font-size="${m.length>2?6:8.5}" font-weight="800" fill="#0A0B14">${m}</text>`});return s+`<text x="100" y="65" text-anchor="middle" font-family="Unbounded" font-size="13" font-weight="800" fill="#F3F3FA">♯ ♭</text></svg>`;}
+function coverProg(){const id='g'+(++GID);const c=[['I',[0,4,7]],['V',[7,11,14]],['vi',[9,12,16]],['IV',[5,9,12]]];let s=`<svg viewBox="0 0 200 110">${gradDefs(id)}`;c.forEach(([r,n],i)=>{n.forEach(v=>{s+=`<rect x="${8+i*48}" y="${92-v*5.2}" width="42" height="8" rx="4" fill="url(#${id})"/>`});s+=`<text x="${29+i*48}" y="106" text-anchor="middle" font-family="Unbounded" font-weight="800" font-size="9" fill="#F3F3FA">${r}</text>`});return s+'</svg>';}
+function coverDigits(){const id='g'+(++GID);return `<svg viewBox="0 0 200 110">${gradDefs(id)}<text x="12" y="34" font-family="JetBrains Mono" font-weight="700" font-size="14" fill="#9598B4">Ma · ya</text><text x="12" y="58" font-family="JetBrains Mono" font-weight="700" font-size="14" fill="#9598B4">5 · 1 ⟲</text><text x="196" y="98" text-anchor="end" font-family="Unbounded" font-weight="800" font-size="64" fill="url(#${id})">15</text></svg>`;}
+function talamSVG(cur=-1,{size=300,mini=false}={}){
+  const id='g'+(++GID), c=size/2, R=c-14, r=R-(mini?22:36); const G=['Klatschen','kleiner Finger','Ringfinger','Mittelfinger','Klatschen','Wenden','Klatschen','Wenden'];
+  const gapAfter=[3,5,7]; let s=`<svg viewBox="0 0 ${size} ${size}" role="img" aria-label="Adi Talam">${gradDefs(id)}`;
+  let a0=-Math.PI/2; const gap=.06, unit=(Math.PI*2-gap*3- gap*.5*5)/8;
+  const arc=(a1,a2,ro,ri)=>{const p=(rad,a)=>[c+rad*Math.cos(a),c+rad*Math.sin(a)];const [x1,y1]=p(ro,a1),[x2,y2]=p(ro,a2),[x3,y3]=p(ri,a2),[x4,y4]=p(ri,a1);return `M${x1},${y1} A${ro},${ro} 0 0 1 ${x2},${y2} L${x3},${y3} A${ri},${ri} 0 0 0 ${x4},${y4} Z`;};
+  for(let b=0;b<8;b++){const a1=a0,a2=a0+unit; const clap=[0,4,6].includes(b); const on=b===cur;
+    s+=`<path class="dial-seg" data-b="${b}" d="${arc(a1,a2,R,r)}" fill="${on?`url(#${id})`:clap?'rgba(255,179,71,.22)':'rgba(255,255,255,.06)'}" stroke="${clap?'rgba(255,179,71,.5)':'rgba(255,255,255,.1)'}"/>`;
+    const am=(a1+a2)/2, tx=c+(R+r)/2*Math.cos(am), ty=c+(R+r)/2*Math.sin(am);
+    s+=`<text x="${tx}" y="${ty+(mini?4:5)}" text-anchor="middle" font-family="Unbounded,sans-serif" font-weight="800" font-size="${mini?11:15}" fill="${on?'#0A0B14':'#F3F3FA'}" pointer-events="none">${b+1}</text>`;
+    a0=a2+(gapAfter.includes(b)?gap:gap*.5);}
+  if(!mini){
+    s+=`<text x="${c}" y="${c-26}" text-anchor="middle" font-family="JetBrains Mono" font-size="11" font-weight="700" fill="#9598B4">I · O · O</text>`;
+    s+=`<text x="${c}" y="${c+12}" text-anchor="middle" font-family="Unbounded,sans-serif" font-size="40" font-weight="800" fill="url(#${id})">${cur<0?'8':cur+1}</text>`;
+    s+=`<text x="${c}" y="${c+38}" text-anchor="middle" font-family="Manrope,sans-serif" font-size="13" font-weight="800" fill="#F3F3FA">${cur<0?'Schläge':G[cur]}</text>`;
+  } else s+=`<text x="${c}" y="${c+8}" text-anchor="middle" font-family="Unbounded" font-size="22" font-weight="800" fill="url(#${id})">8</text>`;
+  return s+'</svg>';
+}
+
+/* ---------- Keyboard ---------- */
+function Keyboard(el,{from=60,to=84,mode=()=>S.label,sa=()=>0}={}){
+  el.innerHTML=''; const keys={}; const whites=[];
+  for(let m=from;m<=to;m++) if([0,2,4,5,7,9,11].includes(m%12)) whites.push(m);
+  const wp=100/whites.length, bw=wp*.58;
+  whites.forEach(m=>{const b=document.createElement('button');b.className='key white';b.dataset.m=m;b.setAttribute('aria-label','Taste '+NAMES.intl[m%12]);b.innerHTML='<span class="lbl"></span>';el.appendChild(b);keys[m]=b;});
+  for(let m=from;m<=to;m++) if([1,3,6,8,10].includes(m%12)){
+    const wi=whites.indexOf(m-1); const b=document.createElement('button');b.className='key black';b.dataset.m=m;b.setAttribute('aria-label','Taste '+NAMES.intl[m%12]);
+    b.style.left=`calc(${(wi+1)*wp}% - ${bw/2}%)`; b.style.width=bw+'%'; b.innerHTML='<span class="lbl"></span>'; el.appendChild(b); keys[m]=b; }
+  let custom=null, lit=new Set();
+  const api={keys,el,
+    target(m){ for(const [k,b] of Object.entries(keys)) b.classList.toggle('target',m!=null&&+k===m); },
+    name(m){ if(custom&&custom[m]!=null) return custom[m]; const md=mode(); if(md==='swara') return SW12[((m%12)-sa()+12)%12]; return NAMES[md][m%12]; },
+    relabel(){ for(const [m,b] of Object.entries(keys)){ const isB=b.classList.contains('black'); const show=lit.has(+m)||(!isB&&lit.size===0&&+m%12===0); b.firstChild.textContent=show?api.name(+m):''; } },
+    light(list,root=null,names=null){ lit=new Set(list); custom=names; for(const [m,b] of Object.entries(keys)){ b.classList.toggle('on',lit.has(+m)); b.classList.toggle('root',root!=null&&+m===root);} api.relabel(); },
+    clear(){ api.light([]); },
+    hit(m,ms=300){ const b=keys[m]; if(!b) return; b.classList.remove('hit'); void b.offsetWidth; b.classList.add('hit'); setTimeout(()=>b.classList.remove('hit'),ms); },
+  };
+  el.addEventListener('pointerdown',e=>{const b=e.target.closest('.key'); if(!b) return; e.preventDefault(); const m=+b.dataset.m; tone(m); api.hit(m); el.dispatchEvent(new CustomEvent('note',{detail:m}));});
+  api.relabel(); return api;
+}
+let seqTimers=[];
+function stopSeq(){seqTimers.forEach(clearTimeout);seqTimers=[];}
+function playSeq(kb,items,step=.34,hold,onIdx){
+  const c=ac(); if(!c) return; stopSeq(); const t0=c.currentTime+.06;
+  items.forEach((it,i)=>{ const t=t0+i*step;
+    if(onIdx) seqTimers.push(setTimeout(()=>onIdx(i),(t-c.currentTime)*1000));
+    if(it==null) return; const arr=Array.isArray(it)?it:[it];
+    let n=0; while(items[i+1+n]===null) n++;
+    arr.forEach(m=>tone(m,t,hold??(Array.isArray(it)?step*.95:step*1.6+n*step),Array.isArray(it)?.42:.55));
+    if(kb) seqTimers.push(setTimeout(()=>arr.forEach(m=>kb.hit(m,Math.max(220,step*900))),(t-c.currentTime)*1000)); });
+  if(onIdx) seqTimers.push(setTimeout(()=>onIdx(-1),(t0+items.length*step-c.currentTime)*1000));
+}
+const scaleSeq=(root,off)=>{const up=off.map(x=>root+x).concat(root+12);return up.concat(up.slice(0,-1).reverse());};
+const tri=(r,t)=>t.map(x=>r+x);
+
+/* ---------- Lessons ---------- */
+const LESSONS=[
+ {id:'w1',tr:'w',t:'Die Tastatur',s:'12 Töne, 2er- und 3er-Gruppen',cover:()=>miniKb([60,62,64,65,67,69,71,72],60),
+  body:`<p>Eine Oktave hat <b>12 Töne</b>: 7 weisse und 5 schwarze Tasten. Die schwarzen Tasten kommen immer in Gruppen von 2 und 3. Daran orientierst du dich auf jedem Klavier.</p>
+  <p>Im DAW heissen die weissen Tasten international <span class="tag">C D E F G A B</span>. Auf Deutsch heisst das B aber <b>H</b>, und «B» meint die schwarze Taste links davon (international B♭).</p>
+  <p>Schwarze Tasten haben zwei Namen: Rechts von C liegt C♯ (Cis), das gleichzeitig D♭ (Des) ist. ♯ heisst einen Halbton höher, ♭ einen Halbton tiefer.</p>`,
+  memo:'C wohnt immer links neben den zwei schwarzen Tasten. F wohnt links neben den drei.',
+  demos:[{l:'Weisse Tasten C–C',seq:[60,62,64,65,67,69,71,72],light:[60,62,64,65,67,69,71,72],root:60},{l:'Alle 12 Töne',seq:[60,61,62,63,64,65,66,67,68,69,70,71,72],light:[60,61,62,63,64,65,66,67,68,69,70,71,72],step:.24}],
+  q:{q:'Welcher Ton liegt direkt links von zwei schwarzen Tasten?',o:['C','F','G','E'],a:0,e:'C steht links vor der 2er-Gruppe, F links vor der 3er-Gruppe.'}},
+ {id:'w2',tr:'w',t:'Halbton & Ganzton',s:'Die Masseinheit der Musik',cover:()=>miniKb([64,65,71,72],null),
+  body:`<p>Ein <b>Halbton</b> ist der kleinste Schritt: von einer Taste zur direkt nächsten, egal ob weiss oder schwarz. Ein <b>Ganzton</b> sind zwei Halbtöne.</p>
+  <p>Im Piano-Roll deines DAW ist ein Halbton genau eine Zeile. Alles in der Musiktheorie lässt sich in Halbtönen zählen.</p>`,
+  fig:()=>`<div class="fig">${steps([0,1,3],{closed:false,w:360})}</div><p class="figcap">H = Halbton (1 Zeile), G = Ganzton (2 Zeilen)</p>`,
+  memo:'E–F und H–C sind «Nachbarn ohne Zaun»: Dazwischen steht keine schwarze Taste, deshalb nur ein Halbton.',
+  demos:[{l:'E → F',seq:[64,65],light:[64,65],step:.5},{l:'H → C',seq:[71,72],light:[71,72],step:.5},{l:'C → D (Ganzton)',seq:[60,62],light:[60,62],step:.5}],
+  q:{q:'Wie viele Halbtöne sind ein Ganzton?',o:['1','2','3','4'],a:1,e:'2 Halbtöne = 1 Ganzton, also 2 Zeilen im Piano-Roll.'}},
+ {id:'w3',tr:'w',t:'Die Dur-Tonleiter',s:'Ein Muster für alle 12 Tonarten',cover:()=>wheel(SCALES['Dur (Ionisch)'],{show:'on'}),
+  body:`<p>Jede Dur-Tonleiter hat dasselbe Muster aus Ganz- (G) und Halbtonschritten (H):</p><p class="formula">G · G · H · G · G · G · H &nbsp;=&nbsp; 2-2-1-2-2-2-1</p>
+  <p>Spiel das Muster von irgendeinem Ton aus, und du hast dessen Dur-Tonleiter. Ab C brauchst du nur weisse Tasten. Ab G brauchst du eine schwarze, das F♯.</p>`,
+  fig:()=>`<div class="fig">${steps(SCALES['Dur (Ionisch)'])}</div><p class="figcap">Die Breite jedes Blocks zeigt die Grösse des Schritts.</p>`,
+  memo:'«Ganz Ganz Halb – Ganz Ganz Ganz Halb»: zwei Schritte, Pause, drei Schritte, Pause. Genau wie die schwarzen Tasten: 2er- und 3er-Gruppe.',
+  demos:[{l:'C-Dur',seq:scaleSeq(60,SCALES['Dur (Ionisch)']),light:SCALES['Dur (Ionisch)'].map(x=>60+x).concat(72),root:60},{l:'G-Dur',seq:scaleSeq(67,SCALES['Dur (Ionisch)']),light:SCALES['Dur (Ionisch)'].map(x=>67+x).concat(79),root:67}],
+  q:{q:'Welches Halbton-Muster hat die Dur-Tonleiter?',o:['2-2-1-2-2-2-1','2-1-2-2-1-2-2','1-2-2-2-1-2-2','2-2-2-1-2-2-1'],a:0,e:'2-2-1-2-2-2-1. Das zweite Muster ist natürliches Moll.'}},
+ {id:'w4',tr:'w',t:'Intervalle mit Liedern',s:'Abstände hören statt zählen',cover:coverBars,intervals:true,
+  body:`<p>Ein <b>Intervall</b> ist der Abstand zwischen zwei Tönen, gezählt in Halbtönen. Am schnellsten lernst du sie mit Liedanfängen. Tippe auf ein Intervall, hör es dir an und summ das Lied dazu.</p>`,
+  memo:'Für jedes Intervall ein Lied. Kein Zählen nötig: Lied im Kopf summen, Abstand erkennen.',
+  demos:[],
+  q:{q:'Wie viele Halbtöne hat eine Quinte?',o:['5','7','4','12'],a:1,e:'7 Halbtöne, wie «Star Wars». Die Quinte ist nach der Oktave das stabilste Intervall.'}},
+ {id:'w5',tr:'w',t:'Dreiklänge',s:'Dur, Moll, vermindert',cover:coverStack,
+  body:`<p>Ein <b>Dreiklang</b> besteht aus Grundton, Terz und Quinte. Auf den weissen Tasten heisst das: Taste, eine auslassen, Taste, eine auslassen, Taste.</p>
+  <p>Ob der Akkord Dur oder Moll ist, entscheidet nur die <b>Terz</b>. Im Piano-Roll verschiebst du dafür eine einzige Note um eine Zeile.</p>`,
+  fig:()=>`<div class="fig">${chordCompare()}</div>`,
+  memo:'Dur = 4 + 3, Moll = 3 + 4. Dur startet mit dem grossen Schritt: «gross und froh». Moll startet klein: «klein und traurig».',
+  demos:[{l:'C-Dur',seq:[60,64,67,tri(60,[0,4,7])],light:tri(60,[0,4,7]),root:60,step:.4},{l:'C-Moll',seq:[60,63,67,tri(60,[0,3,7])],light:tri(60,[0,3,7]),root:60,step:.4},{l:'H vermindert',seq:[71,74,77,[71,74,77]],light:[71,74,77],root:71,step:.4}],
+  q:{q:'C – E♭ – G ist ein …',o:['Dur-Akkord','Moll-Akkord','verminderter Akkord','übermässiger Akkord'],a:1,e:'C bis E♭ sind 3 Halbtöne, E♭ bis G sind 4. 3 + 4 = Moll.'}},
+ {id:'w6',tr:'w',t:'Der Quintenzirkel',s:'Alle Tonarten auf einen Blick',cover:coverCircle,circle:true,
+  body:`<p>Im Uhrzeigersinn geht es eine <b>Quinte höher</b>, und jede Tonart bekommt ein Kreuz (♯) mehr. Gegen den Uhrzeigersinn kommt je ein b (♭) dazu.</p>
+  <p>Innen steht die <b>parallele Molltonart</b>: gleiche Vorzeichen, 3 Halbtöne tiefer (C-Dur ↔ a-Moll). Tipp für Producer: Nachbarn im Kreis klingen zusammen gut und eignen sich für Tonartwechsel.</p>`,
+  memo:'Kreuz-Tonarten: «Geh Du Alter Esel, Hole Fische» = G D A E H Fis. b-Tonarten: «Frische Brötchen Essen Asse Des Gesangs» = F B Es As Des Ges.',
+  memo2:'Reihenfolge der Kreuze: Fis Cis Gis Dis Ais Eis: «Frische Chips gibt’s dienstags am Eingang». Die b in umgekehrter Richtung: B Es As Des Ges Ces.',
+  demos:[],
+  q:{q:'Wie viele Kreuze hat A-Dur?',o:['2','3','4','1'],a:1,e:'«Geh (1) Du (2) Alter (3)»: A ist das dritte Wort, also 3 Kreuze: Fis, Cis, Gis.'}},
+ {id:'w7',tr:'w',t:'Akkorde einer Tonart',s:'Stufen & Progressionen für Beats',cover:coverProg,
+  body:`<p>Baust du auf jedem Ton der Dur-Tonleiter einen Dreiklang, bekommst du 7 Akkorde. Man nummeriert sie römisch: <b>gross = Dur</b>, <b>klein = Moll</b>.</p>`,
+  fig:()=>degreesFig(),
+  after:`<p>Lege die Akkorde im Piano-Roll als Blöcke und spiel die Melodie nur mit Tönen der Tonleiter. Dann passt alles zusammen.</p>`,
+  memo:'Dur – Moll – Moll – Dur – Dur – Moll – vermindert. Merksatz: «Der Mann Malt Drei Dicke Mäuse, vorsichtig».',
+  demos:[
+    {l:'I–V–vi–IV · Pop',seq:[tri(60,[0,4,7]),tri(55,[0,4,7]),tri(57,[0,3,7]),tri(53,[0,4,7])],step:.95,light:[]},
+    {l:'vi–IV–I–V · Emotional',seq:[tri(57,[0,3,7]),tri(53,[0,4,7]),tri(60,[0,4,7]),tri(55,[0,4,7])],step:.95,light:[]},
+    {l:'ii–V–I · Neo-Soul',seq:[[62,65,69,72],[55,59,62,65],[60,64,67,71]],step:1.1,light:[]},
+    {l:'i–VI–VII · Trap',seq:[tri(57,[0,3,7]),tri(53,[0,4,7]),tri(55,[0,4,7]),tri(57,[0,3,7])],step:.95,light:[]}],
+  q:{q:'Welcher Akkord ist in C-Dur die Stufe vi?',o:['Am','F','G','Dm'],a:0,e:'Der 6. Ton von C-Dur ist A. Stufe vi ist Moll: Am.'}},
+ {id:'w8',tr:'w',t:'Modi: sieben Farben',s:'Dorisch, Phrygisch & Co.',cover:()=>wheel(SCALES['Dorisch'],{show:'on',root:2}),
+  body:`<p>Spiel nur die weissen Tasten, aber starte auf einem anderen Ton. Jeder Startton ergibt einen <b>Modus</b> mit eigener Stimmung.</p>`,
+  fig:()=>modesFig(),
+  memo:'«Ich Darf Prima Lieder Mit Anna Lernen» = Ionisch, Dorisch, Phrygisch, Lydisch, Mixolydisch, Äolisch, Lokrisch. Start auf C, D, E, F, G, A, H.',
+  demos:[{l:'D Dorisch',seq:scaleSeq(62,SCALES['Dorisch']),light:SCALES['Dorisch'].map(x=>62+x).concat(74),root:62},{l:'E Phrygisch',seq:scaleSeq(64,SCALES['Phrygisch']),light:SCALES['Phrygisch'].map(x=>64+x).concat(76),root:64},{l:'F Lydisch',seq:scaleSeq(65,SCALES['Lydisch']),light:SCALES['Lydisch'].map(x=>65+x).concat(77),root:65}],
+  q:{q:'Auf welchem weissen Ton beginnt Dorisch?',o:['C','D','E','A'],a:1,e:'«Ich Darf …»: D ist der zweite Ton, also Dorisch.'}},
+ {id:'w9',tr:'w',t:'Moll-Tonarten',s:'Natürlich, harmonisch, melodisch',cover:()=>wheel(SCALES['Harmonisches Moll'],{show:'on',root:9}),
+  body:`<p>Moll gibt es in drei Varianten. Alle starten gleich (2-1-2-2), sie unterscheiden sich nur im 6. und 7. Ton.</p>
+  <div class="tablewrap"><table><thead><tr><th>Moll</th><th>Muster</th><th>Klang</th><th>Raga</th></tr></thead><tbody>
+  <tr><td>Natürlich</td><td class="n">2-1-2-2-1-2-2</td><td>Traurig, Standard für Trap und R&B</td><td>Natabhairavi (20)</td></tr>
+  <tr><td>Harmonisch</td><td class="n">2-1-2-2-1-3-1</td><td>7. Ton höher, dramatisch und orientalisch</td><td>Kiravani (21)</td></tr>
+  <tr><td>Melodisch</td><td class="n">2-1-2-2-2-2-1</td><td>6. und 7. höher, weich und jazzig</td><td>Gourimanohari (23)</td></tr></tbody></table></div>
+  <p><b>Paralleltonart:</b> Jede Durtonart hat eine Molltonart mit denselben Vorzeichen, 3 Halbtöne tiefer. Beispiele: C-Dur ↔ a-Moll, G-Dur ↔ e-Moll. <b>Varianttonart</b> heisst dagegen gleicher Grundton, anderes Geschlecht: C-Dur ↔ c-Moll.</p>`,
+  fig:()=>`<div class="stack" style="gap:14px">${[['Natürlich','Natürliches Moll (Äolisch)'],['Harmonisch','Harmonisches Moll'],['Melodisch (aufwärts)','Melodisches Moll']].map(([n,k])=>`<div><div class="eyebrow" style="margin-bottom:6px">${n}</div>${steps(SCALES[k])}</div>`).join('')}</div><p class="figcap">Der Unterschied liegt nur rechts, im 6. und 7. Ton.</p>`,
+  memo:'Moll ist Dur ab dem 6. Ton: a-Moll = C-Dur von A bis A. «Drei Halbtöne runter, schon bist du in Moll.»',
+  memo2:'Harmonisch: «Die 7 hebt die Hand», sie zieht zum Grundton. Melodisch: «6 und 7 heben die Hand», aber nur aufwärts. Abwärts spielt man meist natürliches Moll.',
+  demos:[
+    {l:'a natürlich',seq:scaleSeq(57+12,SCALES['Natürliches Moll (Äolisch)']),light:SCALES['Natürliches Moll (Äolisch)'].map(x=>69+x).concat(81),root:69},
+    {l:'a harmonisch',seq:scaleSeq(69,SCALES['Harmonisches Moll']),light:SCALES['Harmonisches Moll'].map(x=>69+x).concat(81),root:69},
+    {l:'a melodisch',seq:SCALES['Melodisches Moll'].map(x=>69+x).concat(81),light:SCALES['Melodisches Moll'].map(x=>69+x).concat(81),root:69},
+    {l:'C-Dur → a-Moll',seq:[tri(60,[0,4,7]),tri(60,[0,4,7]),tri(57+12,[0,3,7]),tri(57+12,[0,3,7])],step:.8,light:[60,64,67,69,72,76],root:60}],
+  q:{q:'Welche Molltonart ist die Parallele von G-Dur?',o:['e-Moll','g-Moll','h-Moll','d-Moll'],a:0,e:'G minus 3 Halbtöne = E. G-Dur und e-Moll haben beide ein Kreuz (Fis).'}},
+ {id:'w10',tr:'w',t:'Umkehrungen',s:'Akkorde ohne Sprünge verbinden',cover:()=>invSVG(),
+  body:`<p>Ein Akkord bleibt derselbe, auch wenn du seine Töne anders stapelst. C-Dur ist immer C, E und G, egal welcher Ton unten liegt.</p>
+  <ul><li><b>Grundstellung:</b> C – E – G (Grundton unten)</li><li><b>1. Umkehrung:</b> E – G – C (Terz unten), geschrieben C/E</li><li><b>2. Umkehrung:</b> G – C – E (Quinte unten), geschrieben C/G</li></ul>`,
+  fig:()=>`<div class="fig">${invSVG(true)}</div>`,
+  after:`<p><b>Für Producer:</b> Mit Umkehrungen springen deine Akkorde nicht über die Tastatur. Die Töne bewegen sich nur minimal, das nennt man <b>Voice Leading</b>. Pads und Keys klingen dadurch flüssiger und professioneller. Hör dir unten den Unterschied an: I–IV–V–I zuerst springend, dann mit Umkehrungen.</p>`,
+  memo:'Wer unten steht, gibt den Namen: Grundton → Grundstellung, Terz → 1. Umkehrung, Quinte → 2. Umkehrung. Umkehren heisst: die unterste Note eine Oktave nach oben legen.',
+  demos:[
+    {l:'Grundstellung',seq:[[60,64,67]],step:1.2,light:[60,64,67],root:60},
+    {l:'1. Umkehrung',seq:[[64,67,72]],step:1.2,light:[64,67,72],root:72},
+    {l:'2. Umkehrung',seq:[[67,72,76]],step:1.2,light:[67,72,76],root:72},
+    {l:'I–IV–V–I springend',seq:[[60,64,67],[65,69,72],[67,71,74],[60,64,67]],step:.9,light:[]},
+    {l:'I–IV–V–I mit Umkehrungen',seq:[[64,67,72],[65,69,72],[62,67,71],[64,67,72]],step:.9,light:[64,67,72]}],
+  q:{q:'E – G – C ist welche Stellung von C-Dur?',o:['Grundstellung','1. Umkehrung','2. Umkehrung','Ein Moll-Akkord'],a:1,e:'Die Terz E liegt unten, also 1. Umkehrung (C/E).'}},
+ {id:'w11',tr:'w',t:'Rhythmus & Notenwerte',s:'Vom Takt bis zur Sechzehntel',cover:()=>rhythmSVG(false),
+  body:`<p>Ein <b>4/4-Takt</b> hat vier Schläge (Viertel). Das Tempo in <b>BPM</b> sagt, wie viele Viertel pro Minute erklingen. Jede kleinere Notenart teilt die grössere in zwei Hälften.</p>`,
+  fig:()=>`<div class="fig">${rhythmSVG(true)}</div><p class="figcap">Ein 4/4-Takt, immer feiner unterteilt</p>`,
+  after:`<ul><li><b>Im Piano-Roll</b> entspricht das dem Raster: 1/4, 1/8, 1/16. Ein 4/4-Takt hat 16 Sechzehntel, das Standardraster für Hi-Hats.</li>
+  <li><b>Triole:</b> drei Noten in der Zeit von zwei. Typisch für Trap-Hi-Hats und für Swing.</li>
+  <li><b>Synkope:</b> Die Betonung liegt zwischen den Schlägen statt auf ihnen. Das macht einen Groove spannend.</li>
+  <li><b>Brücke zum Talam:</b> Die 1., 2. und 3. Geschwindigkeit im Adi Talam entsprechen Vierteln, Achteln und Sechzehnteln.</li></ul>`,
+  memo:'Ganze → Halbe → Viertel → Achtel → Sechzehntel: Jede Stufe halbiert, wie eine Pizza, die du immer weiter teilst. 1 Ganze = 2 Halbe = 4 Viertel = 8 Achtel = 16 Sechzehntel.',
+  demos:[{l:'Viertel',fn:()=>subdivDemo(1)},{l:'Achtel',fn:()=>subdivDemo(2)},{l:'Sechzehntel',fn:()=>subdivDemo(4)},{l:'Triolen',fn:()=>subdivDemo(3)}],
+  q:{q:'Wie viele Sechzehntel passen in einen 4/4-Takt?',o:['8','12','16','32'],a:2,e:'4 Viertel × 4 Sechzehntel = 16. Darum hat das Piano-Roll pro Takt 16 Felder im 1/16-Raster.'}},
+ {id:'w12',tr:'w',t:'Noten lesen',s:'Violin- und Bassschlüssel',cover:()=>staffSVG(false),
+  body:`<p>Noten stehen auf <b>fünf Linien</b> oder in den Zwischenräumen. Je höher die Note, desto höher der Ton. Der Schlüssel am Anfang sagt, welche Linie welcher Ton ist.</p>
+  <ul><li><b>Violinschlüssel</b> (rechte Hand, hohe Töne). Linien von unten: <span class="tag">E G H D F</span>, Zwischenräume: <span class="tag">F A C E</span></li>
+  <li><b>Bassschlüssel</b> (linke Hand, tiefe Töne). Linien von unten: <span class="tag">G H D F A</span>, Zwischenräume: <span class="tag">A C E G</span></li>
+  <li>Das <b>mittlere C</b> (C4) liegt auf einer kleinen Hilfslinie genau zwischen den beiden Systemen.</li></ul>
+  <p>Als Producer brauchst du das selten, für Klavierstücke und Lehrbücher aber schon.</p>`,
+  fig:()=>`<div class="fig">${staffSVG(true)}</div>`,
+  memo:'Violinschlüssel-Linien: «Eine Gans Hat Drei Federn» (E G H D F). Zwischenräume ergeben das Wort «FACE». Bassschlüssel-Linien: «Guter Hund Darf Fast Alles» (G H D F A).',
+  memo2:'Bassschlüssel-Zwischenräume auf Englisch: «All Cows Eat Grass» (A C E G).',
+  demos:[{l:'Linien E G H D F',seq:[64,67,71,74,77],light:[64,67,71,74,77],step:.45},{l:'Zwischenräume F A C E',seq:[65,69,72,76],light:[65,69,72,76],step:.45},{l:'Mittleres C',seq:[60],light:[60],root:60,step:.8}],
+  q:{q:'Welche Note liegt im Violinschlüssel auf der mittleren Linie?',o:['D','H','G','C'],a:1,e:'«Eine Gans Hat …»: Die dritte Linie ist H.'}},
+ {id:'w13',tr:'w',t:'Funktionen & Kadenzen',s:'Zuhause, Ausflug, Heimweg',cover:()=>tsdSVG(),
+  body:`<p>Jeder Akkord einer Tonart hat eine <b>Aufgabe</b>, seine Funktion. Es gibt drei Hauptfunktionen:</p>`,
+  fig:()=>tsdCards(),
+  after:`<p>Die <b>Kadenz</b> T – S – D – T ist das Grundgerüst unzähliger Songs. Die Moll-Akkorde vi, ii und iii sind <b>Parallelen</b> (Tp, Sp, Dp): Sie haben dieselbe Funktion, klingen aber weicher.</p>
+  <ul><li><b>Halbschluss:</b> Der Teil endet auf der Dominante, die Spannung bleibt offen. Perfekt vor einem Drop oder Refrain.</li>
+  <li><b>Trugschluss:</b> V geht nicht zu I, sondern zu vi. Das klingt überraschend und emotional.</li></ul>`,
+  memo:'Tonika = Zuhause, Subdominante = Ausflug, Dominante = Heimweg. Die Dominante will immer nach Hause zur Tonika.',
+  demos:[
+    {l:'Kadenz T–S–D–T',seq:[tri(60,[0,4,7]),[60,65,69],[59+12,62+12,67],tri(60,[0,4,7])],step:.9,light:[]},
+    {l:'Halbschluss (endet auf D)',seq:[tri(60,[0,4,7]),[60,65,69],[60,64,69],[62,67,71]],step:.9,light:[]},
+    {l:'Trugschluss V → vi',seq:[tri(60,[0,4,7]),[62,67,71],[60,64,69]],step:1,light:[]}],
+  q:{q:'Welche Funktion erzeugt am meisten Spannung?',o:['Tonika','Subdominante','Dominante','Parallele'],a:2,e:'Die Dominante (Stufe V) will zur Tonika zurück, darum erzeugt sie die meiste Spannung.'}},
+ {id:'w14',tr:'w',t:'Septakkorde',s:'Der Sound von Neo-Soul und Lo-Fi',cover:()=>wheel([0,4,7,11],{show:'on'}),
+  body:`<p>Setz auf einen Dreiklang noch eine Terz, und du bekommst einen <b>Septakkord</b> mit vier Tönen. Er klingt voller und farbiger. Das ist der typische Sound von R&B, Neo-Soul, Lo-Fi und Jazz.</p>`,
+  fig:()=>`<div class="fig">${stackFig([['Maj7',[4,3,4]],['Dominant 7',[4,3,3]],['Moll7',[3,4,3]],['Halbvermindert',[3,3,4]]])}</div><p class="figcap">Halbtöne zwischen den vier Tönen</p>`,
+  after:`<div class="tablewrap"><table><thead><tr><th>Stufe</th><th>I</th><th>ii</th><th>iii</th><th>IV</th><th>V</th><th>vi</th><th>vii</th></tr></thead><tbody>
+  <tr><td>C-Dur</td><td>Cmaj7</td><td>Dm7</td><td>Em7</td><td>Fmaj7</td><td>G7</td><td>Am7</td><td>Hm7♭5</td></tr></tbody></table></div>
+  <p>Producer-Tipp: Die Progression ii7 – V7 – Imaj7 (Dm7 – G7 – Cmaj7) ist die Basis von Jazz und Neo-Soul.</p>`,
+  memo:'Dreiklang + noch eine Terz = Septakkord. Klangfarben: Maj7 = träumen, Moll7 = chillen, Dominant 7 = drängen.',
+  demos:[{l:'Cmaj7',seq:[60,64,67,71,[60,64,67,71]],light:[60,64,67,71],root:60,step:.35},{l:'C7',seq:[60,64,67,70,[60,64,67,70]],light:[60,64,67,70],root:60,step:.35},{l:'Cm7',seq:[60,63,67,70,[60,63,67,70]],light:[60,63,67,70],root:60,step:.35},{l:'Dm7–G7–Cmaj7',seq:[[62,65,69,72],[62,65,67,71],[60,64,67,71]],step:1.1,light:[]}],
+  q:{q:'Welcher Septakkord steht in C-Dur auf Stufe V?',o:['Gmaj7','G7','Gm7','Gm7♭5'],a:1,e:'G – H – D – F: Dur-Dreiklang plus kleine Septime = Dominant 7 (G7).'}},
+ {id:'w15',tr:'w',t:'Pentatonik & Blues',s:'Fünf Töne, die immer passen',cover:()=>miniKb([66,68,70,73,75],null,{from:60,to:76}),
+  body:`<p>Die <b>Pentatonik</b> hat nur 5 Töne und keine Halbtonschritte. Deshalb klingt fast jede Kombination gut, ideal zum Improvisieren und für Hooks.</p>
+  <ul><li><b>Dur-Pentatonik:</b> Dur ohne 4. und 7. Ton (C D E G A). Karnatisch: Mohanam.</li>
+  <li><b>Moll-Pentatonik:</b> dieselben Töne, ab dem 6. Ton gespielt (A C D E G).</li>
+  <li><b>Blues-Skala:</b> Moll-Pentatonik plus «Blue Note», die verminderte Quinte (A C D D♯ E G).</li></ul>`,
+  fig:()=>`<div class="stack" style="gap:14px"><div><div class="eyebrow" style="margin-bottom:6px">Dur-Pentatonik</div>${steps(SCALES['Dur-Pentatonik'])}</div><div><div class="eyebrow" style="margin-bottom:6px">Blues</div>${steps(SCALES['Blues'])}</div></div>`,
+  memo:'Nur schwarze Tasten = Pentatonik! Spiel irgendwas auf den 5 schwarzen Tasten, und es klingt gut (F♯-Dur- bzw. D♯-Moll-Pentatonik).',
+  demos:[{l:'Schwarze Tasten',seq:[66,68,70,73,75,78,75,73,70,68,66],light:[66,68,70,73,75,78],step:.25},{l:'C-Dur-Pentatonik',seq:scaleSeq(60,SCALES['Dur-Pentatonik']),light:[60,62,64,67,69,72],root:60},{l:'A-Blues',seq:scaleSeq(69,SCALES['Blues']),light:SCALES['Blues'].map(x=>69+x).concat(81),root:69}],
+  q:{q:'Welche zwei Töne fehlen der Dur-Pentatonik gegenüber Dur?',o:['2. und 5.','4. und 7.','3. und 6.','1. und 5.'],a:1,e:'Ohne 4. und 7. Ton fallen beide Halbtonschritte weg (E–F und H–C).'}},
+
+ {id:'k1',tr:'k',t:'Die 7 Swaras',s:'Sa Ri Ga Ma Pa Da Ni',cover:()=>wheel([0,2,4,5,7,9,11],{labels:['Sa','','Ri','','Ga','Ma','','Pa','','Da','','Ni'],show:'on'}),
+  body:`<p><b>Sa Ri Ga Ma Pa Da Ni</b> sind die sieben Swaras, wie Do Re Mi Fa Sol La Ti.</p>
+  <p>Wichtig: <b>Sa ist kein fester Ton</b> wie C. Sa ist dein Grundton (Shruti), und du kannst ihn auf jede Taste legen. Für Producer heisst das: Sa = die Tonart deines Beats.</p>
+  <p><b>Sa</b> und <b>Pa</b> (die Quinte) sind fix (Prakruti). Ri, Ga, Ma, Da und Ni haben Varianten (Vikruti).</p>`,
+  memo:'Sa und Pa sind die Anker: Sie bewegen sich nie. Alle anderen Swaras dürfen «wackeln».',
+  demos:[{l:'Sa – Pa – Ṡa',seq:[60,67,72,[60,67,72]],light:[60,67,72],root:60,step:.6,names:{60:'Sa',67:'Pa',72:'Ṡa'}},{l:'Alle 7 Swaras',seq:scaleSeq(60,[0,2,4,5,7,9,11]),light:[60,62,64,65,67,69,71,72],root:60,names:{60:'Sa',62:'Ri',64:'Ga',65:'Ma',67:'Pa',69:'Da',71:'Ni',72:'Ṡa'}}],
+  q:{q:'Welche zwei Swaras sind immer fix?',o:['Sa und Ma','Sa und Pa','Ri und Ga','Pa und Ni'],a:1,e:'Sa (Grundton) und Pa (Quinte) bleiben in jedem Raga gleich.'}},
+ {id:'k2',tr:'k',t:'12 Positionen, 16 Namen',s:'Swarasthanas auf der Tastatur',cover:()=>wheel([0,1,2,3,4,5,6,7,8,9,10,11],{labels:SW12,show:'all'}),
+  body:`<p>Eine Oktave hat 12 Positionen, die <b>Swarasthanas</b>. Vier Tasten haben zwei Namen, deshalb gibt es 16 Namen. Welcher gilt, hängt vom Raga ab.</p>
+  <div class="tablewrap"><table><thead><tr><th>Taste (Sa = C)</th><th>Swara</th><th>Name</th></tr></thead><tbody>
+  <tr><td class="n">C</td><td class="n">S</td><td>Shadjam</td></tr><tr><td class="n">C♯</td><td class="n">R1</td><td>Shuddha Rishabham</td></tr>
+  <tr><td class="n">D</td><td class="n">R2 = G1</td><td>Chatushruti Ri / Shuddha Ga</td></tr><tr><td class="n">D♯</td><td class="n">G2 = R3</td><td>Sadharana Ga / Shatshruti Ri</td></tr>
+  <tr><td class="n">E</td><td class="n">G3</td><td>Antara Gandharam</td></tr><tr><td class="n">F</td><td class="n">M1</td><td>Shuddha Madhyamam</td></tr>
+  <tr><td class="n">F♯</td><td class="n">M2</td><td>Prati Madhyamam</td></tr><tr><td class="n">G</td><td class="n">P</td><td>Panchamam</td></tr>
+  <tr><td class="n">G♯</td><td class="n">D1</td><td>Shuddha Dhaivatam</td></tr><tr><td class="n">A</td><td class="n">D2 = N1</td><td>Chatushruti Da / Shuddha Ni</td></tr>
+  <tr><td class="n">A♯</td><td class="n">N2 = D3</td><td>Kaishiki Ni / Shatshruti Da</td></tr><tr><td class="n">B</td><td class="n">N3</td><td>Kakali Nishadam</td></tr></tbody></table></div>`,
+  memo:'Ri und Ga teilen sich die Tasten zwischen Sa und Ma. Da und Ni teilen sich die zwischen Pa und Ṡa. Die 1 ist immer die tiefste Variante, die 3 die höchste.',
+  demos:[{l:'Alle 12 Swarasthanas',seq:[60,61,62,63,64,65,66,67,68,69,70,71,72],step:.3,light:[60,61,62,63,64,65,66,67,68,69,70,71,72],root:60}],
+  q:{q:'Sa = C. Welche Taste ist G3?',o:['D','D♯','E','F'],a:2,e:'G3 liegt 4 Halbtöne über Sa, also auf E, wie die grosse Terz.'}},
+ {id:'k3',tr:'k',t:'Mayamalavagowla',s:'Der erste Raga · Nr. 15',cover:()=>wheel([0,1,4,5,7,8,11],{labels:SW12,show:'on'}),
+  body:`<p>Mit diesem Raga beginnt die karnatische Ausbildung. Purandara Dasa hat die Grundübungen darin komponiert.</p><p class="formula">S R1 G3 M1 P D1 N3 Ṡ → C D♭ E F G A♭ B C</p>
+  <p>Im Westen heisst diese Skala <b>Doppelharmonisch Dur</b>. Sie klingt orientalisch und funktioniert gut für Trap- und Drill-Melodien.</p>`,
+  fig:()=>`<div class="fig">${steps([0,1,4,5,7,8,11])}</div><p class="figcap">Links und rechts der Mitte dasselbe Muster: H · 3 · H</p>`,
+  memo:'Spiegel-Raga: Die untere Hälfte (S R1 G3 M1) hat die gleichen Abstände wie die obere (P D1 N3 Ṡ): Halbton, 3 Halbtöne, Halbton. Lern eine Hälfte, und du kannst beide.',
+  demos:[{l:'Arohanam & Avarohanam',seq:scaleSeq(60,[0,1,4,5,7,8,11]),light:[60,61,64,65,67,68,71,72],root:60,names:{60:'S',61:'R1',64:'G3',65:'M1',67:'P',68:'D1',71:'N3',72:'Ṡ'}},{l:'Untere Hälfte',seq:[60,61,64,65],light:[60,61,64,65],root:60,step:.45,names:{60:'S',61:'R1',64:'G3',65:'M1'}},{l:'Obere Hälfte',seq:[67,68,71,72],light:[67,68,71,72],root:67,step:.45,names:{67:'P',68:'D1',71:'N3',72:'Ṡ'}}],
+  q:{q:'Welche Melakarta-Nummer hat Mayamalavagowla?',o:['8','15','22','29'],a:1,e:'Nr. 15. Wie man das aus dem Namen ableitet, lernst du in der Lektion Katapayadi.'}},
+ {id:'k4',tr:'k',t:'Ragas, die du kennst',s:'Die Brücke zu westlichen Skalen',cover:()=>wheel(SCALES['Lydisch'],{labels:['S','','R2','','G3','','M2','P','','D2','','N3'],show:'on'}),
+  body:`<p>Viele Melakarta-Ragas haben die gleichen Töne wie westliche Skalen. Tippe auf eine Karte, um beide zu hören.</p>`,
+  fig:()=>ragaGrid(),
+  after:`<p>Aber ein Raga ist mehr als eine Tonleiter. Die <b>Gamakas</b> (Gleit- und Schwingtöne) und typische Phrasen geben ihm seinen Charakter. Die App spielt die Töne gerade, die Gamakas lernst du am besten mit Aufnahmen.</p>`,
+  memo:'Gleiche Töne, andere Seele. Kalyani = Lydisch: beide klingen hell und schwebend, weil Ma eine Stufe höher liegt (M2).',
+  demos:[],
+  q:{q:'Welcher Raga entspricht der Dur-Tonleiter?',o:['Kharaharapriya','Shankarabharanam','Hanumatodi','Kiravani'],a:1,e:'(Dheera)Shankarabharanam, Nr. 29: S R2 G3 M1 P D2 N3, genau Dur.'}},
+ {id:'k5',tr:'k',t:'Katapayadi',s:'Die Nummer steckt im Namen',cover:coverDigits,
+  body:`<p>Die 72 Melakarta-Ragas sind durchnummeriert, und die Nummer ist im Namen versteckt:</p>
+  <ul><li>Nimm die <b>ersten zwei Silben</b>.</li><li>Wandle die Anfangskonsonanten mit der Tabelle in Ziffern um.</li><li><b>Dreh die Ziffern um.</b></li></ul>
+  <div class="tablewrap"><table><thead><tr><th>Reihe</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>0</th></tr></thead><tbody>
+  <tr><td>Ka</td><td>ka</td><td>kha</td><td>ga</td><td>gha</td><td>ṅa</td><td>ca</td><td>cha</td><td>ja</td><td>jha</td><td>ña</td></tr>
+  <tr><td>Ṭa</td><td>ṭa</td><td>ṭha</td><td>ḍa</td><td>ḍha</td><td>ṇa</td><td>ta</td><td>tha</td><td>da</td><td>dha</td><td>na</td></tr>
+  <tr><td>Pa</td><td>pa</td><td>pha</td><td>ba</td><td>bha</td><td>ma</td><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>Ya</td><td>ya</td><td>ra</td><td>la</td><td>va</td><td>śa</td><td>ṣa</td><td>sa</td><td>ha</td><td></td><td></td></tr></tbody></table></div>`,
+  fig:()=>kataFig(),
+  after:`<p>Aus der Nummer folgen die Töne: Nr. 1–36 haben M1, Nr. 37–72 haben M2. Je 6 Ragas bilden ein <b>Chakra</b>. Im Tab «Klavier» unter «Raga» rechnet die App alle 72 aus.</p>`,
+  memo:'Name → zwei Silben → Ziffern → umdrehen. Die 12 Chakras zählen mit Bildern: Indu (1 Mond), Netra (2 Augen), Agni (3 Feuer), Veda (4 Veden), Bana (5 Pfeile), Rutu (6 Jahreszeiten) … Aditya (12 Sonnen).',
+  demos:[{l:'Nr. 15 hören',mela:15},{l:'Nr. 28 hören',mela:28}],
+  q:{q:'Ha = 8, Ri = 2. Welche Nummer hat Harikambhoji?',o:['82','28','10','16'],a:1,e:'8 und 2 ergeben 82, umgedreht 28. Harikambhoji = Mixolydisch.'}},
+ {id:'k6',tr:'k',t:'Adi Talam',s:'Der 8-Schläge-Zyklus',cover:()=>talamSVG(-1,{size:200,mini:true}),
+  body:`<p><b>Talam</b> ist der Rhythmuszyklus. Adi Talam ist der häufigste und hat <b>8 Schläge</b>: ein Laghu (4) und zwei Drutams (je 2). Notation: <span class="tag">I O O</span></p>
+  <ul><li><b>Laghu</b>: klatschen, dann kleiner Finger, Ringfinger, Mittelfinger.</li><li><b>Drutam</b>: klatschen, dann Hand wenden.</li></ul>
+  <p>In der 1. Geschwindigkeit spielst du 1 Ton pro Schlag, in der 2. sind es 2, in der 3. sind es 4. Für deinen Beat: 1 Zyklus = <b>2 Takte im 4/4</b>.</p>`,
+  fig:()=>`<div class="fig" style="max-width:260px;margin:0 auto">${talamSVG(-1,{size:300})}</div>`,
+  memo:'4 + 2 + 2 = 8. «Klatsch, kleiner, Ring, Mittel – Klatsch, Wenden – Klatsch, Wenden.»',
+  demos:[],talamLink:true,
+  q:{q:'Wie viele Schläge hat Adi Talam?',o:['6','7','8','10'],a:2,e:'Laghu 4 + Drutam 2 + Drutam 2 = 8.'}},
+ {id:'k7',tr:'k',t:'Sarali Varisai',s:'Die klassischen Anfängerübungen',cover:()=>miniKb([60,61,64,65,67,68,71,72],60),
+  body:`<p>Die Sarali Varisai sind die ersten Übungen der karnatischen Musik, im Raga Mayamalavagowla und im Adi Talam. Hier findest du alle 14. Jede übst du erst langsam und dann doppelt so schnell. Auf dem Piano sind sie ideale Fingerübungen.</p>
+  <p>Wähl eine Übung, hör sie dir an und spiel sie dann im Trainer Ton für Ton nach. Ein Komma (–) heisst: den Ton einen Schlag länger halten.</p>`,
+  fig:()=>exBrowserHTML('s1'),
+  memo:'Fingersatz rechte Hand: 1-2-3, Daumen unter, 1-2-3-4-5. Genau wie bei C-Dur. Abwärts: 5-4-3-2-1, Mittelfinger über, 3-2-1.',
+  demos:[{l:'Varisai 1',seq:saraliNotes(0),light:[60,61,64,65,67,68,71,72],root:60,step:.42,names:MMG_NAMES},{l:'Varisai 2',seq:saraliNotes(1),light:[60,61,64,65,67,68,71,72],root:60,step:.36,names:MMG_NAMES},{l:'Varisai 3',seq:saraliNotes(2),light:[60,61,64,65,67,68,71,72],root:60,step:.36,names:MMG_NAMES}],
+  talamLink:true,
+  q:{q:'In welchem Raga stehen die Sarali Varisai?',o:['Kalyani','Mohanam','Mayamalavagowla','Todi'],a:2,e:'Mayamalavagowla. Purandara Dasa hat ihn für die Grundübungen gewählt.'}},
+ {id:'k8',tr:'k',t:'Janta Varisai',s:'Jeder Ton im Doppelpack',cover:()=>jantaCover(),
+  body:`<p><b>Janta</b> heisst «Paar»: Jede Swara wird doppelt gespielt. Das ist die zweite Übungsreihe nach den Sarali Varisai, ebenfalls in Mayamalavagowla und Adi Talam.</p>
+  <p>Die Übung trainiert saubere, gleichmässige Anschläge. Im Gesang bekommt der zweite Ton einen leichten Akzent. Auf dem Piano spielst du wiederholte Töne am besten mit Fingerwechsel, zum Beispiel 3-2. So bleibt es gleichmässig, ohne dass die Hand verkrampft.</p>`,
+  fig:()=>exBrowserHTML('j1'),
+  memo:'Janta = Zwilling. Jeder Ton kommt zu zweit, vier Paare pro Zeile, dann geht es eine Stufe höher: SS RR GG MM → RR GG MM PP → GG MM PP DD …',
+  demos:[{l:'Janta Varisai 1',seq:exNotes('j1'),light:MMG_KEYS,root:60,step:.3,names:MMG_NAMES}],
+  talamLink:true,
+  q:{q:'Was bedeutet «Janta»?',o:['Paar / doppelt','schnell','Oktave','Pause'],a:0,e:'Janta heisst Paar: Jede Swara wird zweimal gespielt.'}},
+ {id:'k9',tr:'k',t:'Shruti & Tanpura',s:'Der Anker für jeden Ton',cover:()=>droneSVG(),
+  body:`<p><b>Shruti</b> ist der Grundton, auf den du dein Sa legst. Jede Musikerin und jeder Musiker wählt die Shruti passend zur eigenen Stimme oder zum Instrument. Im Beat ist das deine Tonart.</p>
+  <p>Die <b>Tanpura</b> ist ein Saiteninstrument, das ohne Pause Sa und Pa spielt, einen sogenannten Drone. Er läuft während der ganzen Musik im Hintergrund. An ihm hörst du sofort, ob deine Töne sauber sind.</p>
+  <p>Das Wort Shruti steht auch für die feinen Tonstufen zwischen den 12 Halbtönen. Die Theorie kennt 22 davon. Sie sind ein Grund, warum Ragas mit Gamakas lebendiger klingen als auf einem fest gestimmten Klavier.</p>
+  <p><b>Für Producer:</b> Ein Sa-Pa-Drone ist ein perfekter Pad. Leg ihn unter einen Beat, und alles klingt sofort «indisch geerdet».</p>`,
+  memo:'Die Tanpura ist dein Anker: Pa – Sa – Sa – tiefes Sa, immer im Kreis. Erst hören, dann spielen.',
+  demos:[{l:'Tanpura an / aus',fn:()=>Drone.toggle(),light:[60,67,72],root:60,names:{60:'Sa',67:'Pa',72:'Ṡa'}},{l:'Sa – Pa – Ṡa über den Drone',seq:[60,67,72,67,60],light:[60,67,72],root:60,step:.8,names:{60:'Sa',67:'Pa',72:'Ṡa'}}],
+  q:{q:'Welche Töne spielt die Tanpura meistens?',o:['Sa und Ga','Sa und Pa','Ri und Ni','Alle sieben'],a:1,e:'Sa und Pa, die beiden festen Swaras. Sie bilden den Anker für alle anderen Töne.'}},
+ {id:'k10',tr:'k',t:'Janya-Ragas',s:'Kinder der Melakartas',cover:()=>wheel([0,2,4,7,9],{labels:['S','','R2','','G3','','','P','','D2','',''],show:'on'}),
+  body:`<p>Die 72 Melakartas sind die «Eltern» (Janaka), sie haben immer alle 7 Swaras. Daraus entstehen Hunderte <b>Janya-Ragas</b> («Kinder»). Ein Janya-Raga lässt Töne weg oder geht im Zickzack:</p>
+  <ul><li><b>Audava:</b> 5 Töne (pentatonisch)</li><li><b>Shadava:</b> 6 Töne</li><li><b>Vakra:</b> Die Tonleiter läuft nicht gerade, sondern macht Umwege, z. B. S R G R M …</li></ul>
+  <p>Tippe auf eine Karte, um den Raga zu hören:</p>`,
+  fig:()=>janyaGrid(),
+  memo:'Janaka = Eltern, Janya = Kind. Kinder lassen Töne weg (5 = Audava, 6 = Shadava) oder gehen Zickzack (Vakra).',
+  demos:[],
+  q:{q:'Mohanam hat 5 Töne. Wie heisst so ein Raga?',o:['Sampurna','Shadava','Audava','Vakra'],a:2,e:'Audava = 5 Töne. Sampurna heisst alle 7, Shadava 6.'}},
+ {id:'k11',tr:'k',t:'Gamakas',s:'Töne, die sich bewegen',cover:()=>gamakaSVG(false),
+  body:`<p>Ein <b>Gamaka</b> ist eine Verzierung: Der Ton steht nicht still, sondern schwingt, gleitet oder wird angestossen. Gamakas machen den Unterschied zwischen einer Tonleiter und einem Raga.</p>
+  <ul><li><b>Kampita:</b> Der Ton schwingt schnell zum Nachbarton und zurück.</li>
+  <li><b>Jaru:</b> Gleiten von einem Ton zum anderen, aufwärts (Erra Jaru) oder abwärts (Irakka Jaru).</li>
+  <li><b>Nokku:</b> Der Ton wird kurz von oben «angetippt».</li>
+  <li><b>Sphurita:</b> Ein wiederholter Ton, beim zweiten Mal mit einem Stoss vom Ton darunter.</li>
+  <li><b>Andola:</b> eine langsame, schaukelnde Bewegung.</li></ul>`,
+  fig:()=>`<div class="fig">${gamakaSVG(true)}</div><p class="figcap">Tonhöhe über Zeit: so bewegt sich der Ton</p>`,
+  after:`<p><b>Auf dem Keyboard und im DAW:</b> Ein Klavier kann nicht gleiten. Mit dem <b>Pitch-Bend-Rad</b> eines MIDI-Keyboards oder Pitch-Automation im DAW kannst du Gamakas nachbauen. Stell den Bend-Bereich auf 2 Halbtöne.</p>`,
+  memo:'Gamaka = Ton mit Bewegung. Kampita = zittern, Jaru = rutschen, Nokku = von oben antippen.',
+  demos:[
+    {l:'Gerader Ton (Ga)',fn:()=>glide([[0,64],[1.2,64]]),light:[64],names:{64:'G3'}},
+    {l:'Kampita auf Ga',fn:()=>glide([[0,64],[.25,64],[.33,65],[.41,64],[.49,65],[.57,64],[.65,65],[.73,64],[1.2,64]]),light:[64,65],names:{64:'G3',65:'M1'}},
+    {l:'Jaru aufwärts Sa → Pa',fn:()=>glide([[0,60],[.35,60],[.8,67],[1.5,67]]),light:[60,67],root:60,names:{60:'S',67:'P'}},
+    {l:'Jaru abwärts Ṡa → Pa',fn:()=>glide([[0,72],[.35,72],[.8,67],[1.5,67]]),light:[67,72],names:{67:'P',72:'Ṡ'}},
+    {l:'Nokku auf Ga',fn:()=>glide([[0,66],[.07,64],[1.1,64]]),light:[64],names:{64:'G3'}}],
+  q:{q:'Welcher Gamaka ist ein Gleiten von einem Ton zum anderen?',o:['Kampita','Jaru','Nokku','Sphurita'],a:1,e:'Jaru heisst Gleiten, aufwärts Erra Jaru, abwärts Irakka Jaru.'}},
+ {id:'k12',tr:'k',t:'Solkattu & Talas',s:'Rhythmus sprechen: Ta Ka Di Mi',cover:()=>solCover(),
+  body:`<p><b>Solkattu</b> sind Rhythmus-Silben. Man spricht sie, um Rhythmen zu lernen, bevor man sie spielt. Jede Gruppengrösse (Jati) hat ihre Silben:</p>
+  <div class="tablewrap"><table><thead><tr><th>Jati</th><th>Zahl</th><th>Silben</th></tr></thead><tbody>
+  <tr><td>Tisra</td><td class="n">3</td><td>Ta Ki Ta</td></tr>
+  <tr><td>Chatusra</td><td class="n">4</td><td>Ta Ka Di Mi</td></tr>
+  <tr><td>Khanda</td><td class="n">5</td><td>Ta Ka · Ta Ki Ta</td></tr>
+  <tr><td>Misra</td><td class="n">7</td><td>Ta Ki Ta · Ta Ka Di Mi</td></tr>
+  <tr><td>Sankeerna</td><td class="n">9</td><td>Ta Ka Di Mi · Ta Ka · Ta Ki Ta</td></tr></tbody></table></div>
+  <p>Neben Adi Talam (8) sind diese Talas besonders häufig:</p>
+  <ul><li><b>Rupaka Talam:</b> 6 Schläge = Drutam (2) + Laghu (4)</li>
+  <li><b>Misra Chapu:</b> 7 Schläge, gruppiert 3 + 2 + 2 (wie ein 7/8-Takt)</li>
+  <li><b>Khanda Chapu:</b> 5 Schläge, gruppiert 2 + 1 + 2 (wie ein 5/8-Takt)</li></ul>
+  <p><b>Für Producer:</b> Spiel Hi-Hats oder Percs in 5er- oder 7er-Gruppen über einen normalen 4/4-Beat. Das ergibt sofort einen komplexen, «verschobenen» Groove (Polyrhythmus).</p>`,
+  memo:'Grosse Zahlen sind kleine zusammengesetzt: Ta-Ki-Ta (3) + Ta-Ka-Di-Mi (4) = 7 = Misra. Ta-Ka (2) + Ta-Ki-Ta (3) = 5 = Khanda.',
+  demos:[{l:'Tisra 3',fn:()=>clickPattern([3],150,4)},{l:'Khanda 5',fn:()=>clickPattern([2,3],170,3)},{l:'Misra Chapu 7',fn:()=>clickPattern([3,2,2],170,3)},{l:'Rupaka 6',fn:()=>clickPattern([2,4],140,3)}],
+  talamLink:true,
+  q:{q:'Wie viele Schläge hat Misra Chapu?',o:['5','6','7','8'],a:2,e:'Misra = 7, gruppiert 3 + 2 + 2: Ta Ki Ta · Ta Ka · Di Mi.'}},
+];
+
+/* lesson figures */
+function chordCompare(){
+  const id='g'+(++GID); const rows=[['Dur',[4,3]],['Moll',[3,4]],['Vermindert',[3,3]],['Übermässig',[4,4]]];
+  let s=`<svg viewBox="0 0 360 176" role="img" aria-label="Dreiklang-Vergleich">${gradDefs(id)}`;
+  rows.forEach(([n,[a,b]],i)=>{const y=8+i*42, u=26;
+    s+=`<text x="0" y="${y+21}" font-family="Manrope" font-weight="800" font-size="13" fill="#F3F3FA">${n}</text>`;
+    s+=`<rect x="96" y="${y}" width="${a*u-3}" height="30" rx="10" fill="url(#${id})"/><text x="${96+(a*u-3)/2}" y="${y+20}" text-anchor="middle" font-family="Unbounded" font-weight="800" font-size="13" fill="#0A0B14">${a}</text>`;
+    s+=`<rect x="${96+a*u}" y="${y}" width="${b*u-3}" height="30" rx="10" fill="rgba(255,255,255,.1)" stroke="rgba(255,255,255,.25)"/><text x="${96+a*u+(b*u-3)/2}" y="${y+20}" text-anchor="middle" font-family="Unbounded" font-weight="800" font-size="13" fill="#F3F3FA">${b}</text>`;});
+  return s+`</svg>`;
+}
+function degreesFig(){
+  const d=[['I','C','Dur'],['ii','Dm','Moll'],['iii','Em','Moll'],['IV','F','Dur'],['V','G','Dur'],['vi','Am','Moll'],['vii°','H°','verm.']];
+  return `<div class="fig"><svg viewBox="0 0 560 120" role="img" aria-label="Stufen in C-Dur">${gradDefs('dg')}${d.map(([r,c,q],i)=>{const x=i*80, maj=q==='Dur', dim=q==='verm.';
+    return `<rect x="${x+3}" y="10" width="74" height="100" rx="18" fill="${maj?'url(#dg)':dim?'rgba(255,107,122,.15)':'rgba(255,255,255,.06)'}" stroke="${maj?'none':dim?'rgba(255,107,122,.5)':'rgba(255,255,255,.18)'}"/>
+    <text x="${x+40}" y="46" text-anchor="middle" font-family="Unbounded" font-weight="800" font-size="20" fill="${maj?'#0A0B14':'#F3F3FA'}">${r}</text>
+    <text x="${x+40}" y="74" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="15" fill="${maj?'#0A0B14':'#F3F3FA'}">${c}</text>
+    <text x="${x+40}" y="96" text-anchor="middle" font-family="Manrope" font-weight="800" font-size="11" fill="${maj?'#0A0B14':'#9598B4'}">${q}</text>`}).join('')}</svg></div>`;
+}
+function modesFig(){
+  const m=[['Ionisch','C',SCALES['Dur (Ionisch)'],'= Dur'],['Dorisch','D',SCALES['Dorisch'],'warm · Lo-Fi'],['Phrygisch','E',SCALES['Phrygisch'],'dunkel · Drill'],['Lydisch','F',SCALES['Lydisch'],'verträumt · Film'],['Mixolydisch','G',SCALES['Mixolydisch'],'Rock · Funk'],['Äolisch','A',SCALES['Natürliches Moll (Äolisch)'],'= Moll'],['Lokrisch','H',SCALES['Lokrisch'],'instabil']];
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">${m.map(([n,st,off,desc],i)=>`<button class="card" data-mode="${i}" style="padding:12px;gap:6px;text-align:left;border-radius:18px">${wheel(off,{show:'on',size:200,root:[0,2,4,5,7,9,11][i]})}<div><b style="font-family:var(--f-d);font-size:.9rem">${n}</b><div class="muted" style="font-size:.78rem">Start ${st} · ${desc}</div></div></button>`).join('')}</div>`;
+}
+const RAGA_MAP=[[29,'Shankarabharanam','Dur'],[22,'Kharaharapriya','Dorisch'],[8,'Hanumatodi','Phrygisch'],[65,'Kalyani','Lydisch'],[28,'Harikambhoji','Mixolydisch'],[20,'Natabhairavi','Nat. Moll'],[21,'Kiravani','Harm. Moll']];
+function ragaGrid(){
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">${RAGA_MAP.map(([n,r,w])=>{const M=mela(n);const lab=Array(12).fill('');M.off.forEach((o,i)=>lab[o]=M.sw[i]);return `<button class="card" data-mela="${n}" style="padding:12px;gap:6px;text-align:left;border-radius:18px">${wheel(M.off,{labels:lab,show:'on',size:200})}<div><span class="pill acc">${n}</span> <b style="font-family:var(--f-d);font-size:.85rem">${r}</b><div class="muted" style="font-size:.8rem">= ${w}</div></div></button>`}).join('')}</div>`;
+}
+function kataFig(){
+  const ex=[['Ma · ya','5 · 1','15','Mayamalavagowla'],['Dhee · ra','9 · 2','29','Dheerasankarabharanam'],['Ha · ri','8 · 2','28','Harikambhoji'],['Ha · nu','8 · 0','08','Hanumatodi']];
+  return `<div style="display:grid;gap:8px">${ex.map(([sy,dg,n,name])=>`<div style="display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:10px 14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line)"><div><b style="font-size:.88rem">${name}</b><div class="notes-line muted" style="font-size:.8rem">${sy} → ${dg}</div></div><span class="muted" style="font-size:1.2rem">⟲</span><span style="font-family:var(--f-d);font-weight:800;font-size:1.6rem" class="grad-text">${n}</span></div>`).join('')}</div>`;
+}
+function exBrowserHTML(def){
+  return `<div class="exb stack" data-def="${def}" style="gap:12px">
+    <label class="f">Übung<select class="ex-sel">${EX.map(e=>`<option value="${e.id}">${e.name}</option>`).join('')}</select></label>
+    <div class="ex-grid"></div><p class="figcap" style="text-align:left">Jeder Block = 1 Zyklus Adi Talam (8 Schläge)</p>
+    <div class="row"><button class="btn primary ex-play"><svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>Abspielen</button>
+      <div class="seg ex-speed" role="group" aria-label="Geschwindigkeit"><button data-s=".5" aria-pressed="true">Langsam</button><button data-s=".3" aria-pressed="false">Mittel</button><button data-s=".18" aria-pressed="false">Schnell</button></div></div>
+    <div class="tr-slot"></div></div>`;
+}
+function setupExBrowser(root,kb){
+  const sel=root.querySelector('.ex-sel'), grid=root.querySelector('.ex-grid'); let step=.5;
+  sel.value=root.dataset.def;
+  function draw(){
+    let i=0; const e=EX.find(x=>x.id===sel.value);
+    grid.innerHTML=e.txt.split(' | ').map(g=>`<div class="ex-av">${g.split(' ').map(n=>`<span class="ex-cell ${n==='S'||n==='Ṡ'?'sa':''} ${n===','?'hold':''}" data-i="${i++}">${n===','?'–':n}</span>`).join('')}</div>`).join('');
+  }
+  const cells=()=>grid.querySelectorAll('.ex-cell');
+  const hl=i=>cells().forEach(c=>c.classList.toggle('cur',+c.dataset.i===i));
+  kb.light(MMG_KEYS,60,MMG_NAMES);
+  const tr=Trainer(root.querySelector('.tr-slot'),{kb,onIndex:hl,source:()=>{const n=exNotes(sel.value);return {notes:n,labels:n.map(m=>m==null?'':MMG_NAMES[m])};}});
+  sel.onchange=()=>{stopSeq();draw();tr.reset();};
+  root.querySelectorAll('.ex-speed button').forEach(b=>b.onclick=()=>{step=+b.dataset.s;root.querySelectorAll('.ex-speed button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
+  root.querySelector('.ex-play').onclick=()=>{tr.reset();playSeq(kb,exNotes(sel.value),step,undefined,hl);};
+  draw();
+}
+function invSVG(big=false){
+  const id='g'+(++GID), cols=[['Grundstellung','C',['C','E','G']],['1. Umkehrung','C/E',['E','G','C']],['2. Umkehrung','C/G',['G','C','E']]];
+  const W=big?360:200,H=big?190:120,cw=W/3,ph=big?30:22,pw=cw*.62;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Umkehrungen von C-Dur">${gradDefs(id)}`;
+  cols.forEach(([n,sym,notes],c)=>{const x=c*cw+(cw-pw)/2, base=H-(big?34:10);
+    notes.forEach((t,k)=>{const y=base-(k+1)*(ph+4);s+=`<rect x="${x}" y="${y}" width="${pw}" height="${ph}" rx="${ph/2}" fill="${k===0?`url(#${id})`:'rgba(255,255,255,.1)'}" ${k===0?'':'stroke="rgba(255,255,255,.25)"'}/><text x="${x+pw/2}" y="${y+ph/2+(big?5:4)}" text-anchor="middle" font-family="Unbounded,sans-serif" font-weight="800" font-size="${big?14:11}" fill="${k===0?'#0A0B14':'#F3F3FA'}">${t}</text>`;});
+    if(big){s+=`<text x="${c*cw+cw/2}" y="${H-14}" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="11" fill="#9598B4">${n}</text><text x="${c*cw+cw/2}" y="${base-3*(ph+4)-8}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="12" fill="#F3F3FA">${sym}</text>`;}
+  });
+  return s+'</svg>';
+}
+function rhythmSVG(big){
+  const id='g'+(++GID), rows=[['Ganze',1],['Halbe',2],['Viertel',4],['Achtel',8],['Sechzehntel',16]];
+  const W=big?360:200,lx=big?92:6,rh=big?26:18,g=big?8:4,H=rows.length*(rh+g)+4; const bw=W-lx-4;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Notenwerte">${gradDefs(id)}`;
+  rows.forEach(([n,k],r)=>{const y=r*(rh+g)+2, u=bw/k;
+    if(big) s+=`<text x="0" y="${y+rh/2+4}" font-family="Manrope,sans-serif" font-weight="800" font-size="12" fill="#F3F3FA">${n}</text>`;
+    for(let i=0;i<k;i++) s+=`<rect x="${lx+i*u+1}" y="${y}" width="${Math.max(1,u-2)}" height="${rh}" rx="${Math.min(6,u/3)}" fill="url(#${id})" opacity="${i%(k/Math.min(k,4)||1)===0?1:.55}"/>`;});
+  return s+'</svg>';
+}
+function staffSVG(big){
+  const id='g'+(++GID); const W=big?360:200,H=big?250:120;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Notensysteme">${gradDefs(id)}`;
+  const staff=(y0,sp,lines,spaces,label)=>{let o='';
+    for(let i=0;i<5;i++) o+=`<line x1="4" x2="${W-4}" y1="${y0+i*sp}" y2="${y0+i*sp}" stroke="rgba(255,255,255,.28)" stroke-width="1.2"/>`;
+    if(label) o+=`<text x="6" y="${y0-8}" font-family="Manrope,sans-serif" font-weight="800" font-size="11" fill="#9598B4">${label}</text>`;
+    const x0=big?40:22, dx=big?36:20, r=sp*.42;
+    lines.forEach((n,i)=>{const y=y0+(4-i)*sp, x=x0+i*dx*2; o+=`<ellipse cx="${x}" cy="${y}" rx="${r*1.3}" ry="${r}" fill="url(#${id})"/>`; if(big) o+=`<text x="${x}" y="${y0+4*sp+20}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="11" fill="#F3F3FA">${n}</text>`;});
+    spaces.forEach((n,i)=>{const y=y0+(3.5-i)*sp, x=x0+dx+i*dx*2; o+=`<ellipse cx="${x}" cy="${y}" rx="${r*1.3}" ry="${r}" fill="rgba(255,255,255,.55)"/>`; if(big) o+=`<text x="${x}" y="${y0+4*sp+20}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="11" fill="#9598B4">${n}</text>`;});
+    return o;};
+  if(big){ s+=staff(24,13,['E','G','H','D','F'],['F','A','C','E'],'Violinschlüssel'); s+=staff(154,13,['G','H','D','F','A'],['A','C','E','G'],'Bassschlüssel'); }
+  else s+=staff(28,14,['E','G','H','D','F'],['F','A','C','E'],'');
+  return s+'</svg>';
+}
+function tsdSVG(){const id='g'+(++GID);let s=`<svg viewBox="0 0 200 120">${gradDefs(id)}<path d="M50 70 Q100 10 150 70" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-dasharray="4 4"/><path d="M150 82 Q100 120 50 82" fill="none" stroke="url(#${id})" stroke-width="3"/><path d="M58 86 l-10 -4 l6 -8" fill="none" stroke="url(#${id})" stroke-width="3" stroke-linecap="round"/>`;
+  [['T',38,76,1],['S',100,32,.45],['D',162,76,.8]].forEach(([l,x,y,o])=>{s+=`<circle cx="${x}" cy="${y}" r="20" fill="url(#${id})" opacity="${o}"/><text x="${x}" y="${y+7}" text-anchor="middle" font-family="Unbounded,sans-serif" font-weight="800" font-size="18" fill="#0A0B14">${l}</text>`});return s+'</svg>';}
+function tsdCards(){
+  const c=[['T','Tonika','I · C-Dur','Zuhause, Ruhe, Ende','Tp = vi (Am)'],['S','Subdominante','IV · F-Dur','Ausflug, Bewegung weg','Sp = ii (Dm)'],['D','Dominante','V · G-Dur','Spannung, will heim','Dp = iii (Em)']];
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">${c.map(([l,n,d,f,p],i)=>`<div style="padding:14px;border-radius:18px;border:1px solid var(--line2);background:${i===2?'linear-gradient(135deg,color-mix(in srgb,var(--acc) 25%,transparent),transparent)':'rgba(255,255,255,.03)'};display:flex;flex-direction:column;gap:4px"><span style="width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-family:var(--f-d);font-weight:800;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0A0B14">${l}</span><b style="font-family:var(--f-d);font-size:.95rem;margin-top:4px">${n}</b><span class="notes-line" style="color:var(--acc);font-size:.8rem">${d}</span><span style="font-size:.88rem">${f}</span><span class="muted" style="font-size:.8rem">Parallele: ${p}</span></div>`).join('')}</div>`;
+}
+function stackFig(rows){
+  const id='g'+(++GID), u=24, H=rows.length*42+4;
+  let s=`<svg viewBox="0 0 380 ${H}" role="img" aria-label="Intervall-Aufbau">${gradDefs(id)}`;
+  rows.forEach(([n,parts],i)=>{const y=4+i*42; let x=118;
+    s+=`<text x="0" y="${y+20}" font-family="Manrope" font-weight="800" font-size="12.5" fill="#F3F3FA">${n}</text>`;
+    parts.forEach((p,k)=>{const w=p*u-3; s+=`<rect x="${x}" y="${y}" width="${w}" height="30" rx="10" fill="${k%2?'rgba(255,255,255,.1)':`url(#${id})`}" ${k%2?'stroke="rgba(255,255,255,.25)"':''}/><text x="${x+w/2}" y="${y+20}" text-anchor="middle" font-family="Unbounded" font-weight="800" font-size="13" fill="${k%2?'#F3F3FA':'#0A0B14'}">${p}</text>`; x+=p*u;});});
+  return s+'</svg>';
+}
+function droneSVG(){const id='g'+(++GID);let s=`<svg viewBox="0 0 200 110">${gradDefs(id)}`;for(let k=0;k<4;k++){let d='M0 '+(30+k*16);for(let x=0;x<=200;x+=5)d+=` L${x} ${30+k*16+Math.sin(x/(9+k*4)+k)*(6-k)}`;s+=`<path d="${d}" fill="none" stroke="url(#${id})" stroke-width="${3-k*.5}" opacity="${1-k*.18}"/>`}return s+`<text x="100" y="104" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="10" fill="#F3F3FA">P · S · S · S</text></svg>`;}
+const JANYA_LIST=[['Mohanam',[0,2,4,7,9],['S','R2','G3','P','D2'],'aus Harikambhoji (28)','Audava · = Dur-Pentatonik'],['Hamsadhwani',[0,2,4,7,11],['S','R2','G3','P','N3'],'aus Shankarabharanam (29)','Audava · festlich'],['Hindolam',[0,3,5,8,10],['S','G2','M1','D1','N2'],'aus Natabhairavi (20)','Audava · ernst'],['Abhogi',[0,2,3,5,9],['S','R2','G2','M1','D2'],'aus Kharaharapriya (22)','Audava · sanft']];
+function janyaGrid(){
+  return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px">${JANYA_LIST.map(([n,off,sw,par,d],i)=>{const lab=Array(12).fill('');off.forEach((o,k)=>lab[o]=sw[k]);return `<button class="card" data-janya="${i}" style="padding:12px;gap:6px;text-align:left;border-radius:18px">${wheel(off,{labels:lab,show:'on',size:200})}<div><b style="font-family:var(--f-d);font-size:.9rem">${n}</b><div class="notes-line" style="color:var(--acc);font-size:.75rem">${sw.join(' ')} Ṡ</div><div class="muted" style="font-size:.78rem">${par}<br>${d}</div></div></button>`}).join('')}</div>`;
+}
+function gamakaSVG(big){
+  const id='g'+(++GID); const W=big?360:200,H=big?150:110;
+  const panels=[['Kampita',x=>x<.25?0:x>.8?0:Math.sin((x-.25)*40)*.5+.5],['Jaru',x=>x<.3?1:x>.65?0:1-(x-.3)/.35],['Nokku',x=>x<.08?1-x/.08*1:0]];
+  const pw=W/3; let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gamaka-Kurven">${gradDefs(id)}`;
+  panels.forEach(([n,f],i)=>{const x0=i*pw+6,w=pw-12,top=big?20:16,h=H-(big?52:40);
+    s+=`<rect x="${x0}" y="${top-8}" width="${w}" height="${h+16}" rx="12" fill="rgba(255,255,255,.03)" stroke="rgba(255,255,255,.08)"/>`;
+    let d=''; for(let k=0;k<=60;k++){const t=k/60; const y=top+h-(f(t)*.7+.15)*h; d+=(k?' L':'M')+(x0+6+t*(w-12)).toFixed(1)+' '+y.toFixed(1);}
+    s+=`<path d="${d}" fill="none" stroke="url(#${id})" stroke-width="${big?3:2.5}" stroke-linecap="round" stroke-linejoin="round"/>`;
+    s+=`<text x="${x0+w/2}" y="${H-(big?10:6)}" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="${big?12:10}" fill="#F3F3FA">${n}</text>`;});
+  return s+'</svg>';
+}
+function solCover(){const id='g'+(++GID);const g=[['Ta','Ki','Ta'],['Ta','Ka'],['Di','Mi']];let s=`<svg viewBox="0 0 200 110">${gradDefs(id)}`;let x=8;g.forEach((grp,gi)=>{grp.forEach((t,k)=>{s+=`<rect x="${x}" y="${38}" width="24" height="34" rx="8" fill="${k===0?`url(#${id})`:'rgba(255,255,255,.12)'}"/><text x="${x+12}" y="60" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="10" fill="${k===0?'#0A0B14':'#F3F3FA'}">${t}</text>`;x+=26;});x+=8;});return s+`<text x="100" y="96" text-anchor="middle" font-family="Unbounded" font-weight="800" font-size="11" fill="#F3F3FA">3 + 2 + 2 = 7</text></svg>`;}
+function jantaCover(){const id='g'+(++GID);const n=['S','S','R','R','G','G','M','M'];let s=`<svg viewBox="0 0 200 110">${gradDefs(id)}`;n.forEach((t,i)=>{const x=8+i*23.5,y=78-Math.floor(i/2)*16;s+=`<rect x="${x}" y="${y}" width="20" height="24" rx="6" fill="${i%2?'rgba(255,255,255,.14)':`url(#${id})`}"/><text x="${x+10}" y="${y+16}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="11" fill="${i%2?'#F3F3FA':'#0A0B14'}">${t}</text>`});return s+'</svg>';}
+
+/* ---------- Views & nav ---------- */
+const $=s=>document.querySelector(s);
+const views={learn:$('#v-learn'),lesson:$('#v-lesson'),piano:$('#v-piano'),ear:$('#v-ear'),talam:$('#v-talam')};
+function show(v){
+  stopSeq(); Mic.stop(); Drone.stop(); if(v!=='talam') stopTalam();
+  for(const [k,el] of Object.entries(views)) el.hidden=(k!==v);
+  document.querySelectorAll('.nav button').forEach(b=>b.setAttribute('aria-current',(b.dataset.v===v||(v==='lesson'&&b.dataset.v==='learn'))?'page':'false'));
+  if(v==='learn') renderLearn();
+  if(v==='piano'){updatePiano();vizP.size();}
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>show(b.dataset.v)));
+function hdr(){ $('#hdr-prog').innerHTML=`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12l5 5L20 7"/></svg>${S.done.length} / ${LESSONS.length}`; }
+
+/* ---------- Learn ---------- */
+let heroViz=null;
+function renderLearn(){
+  hdr();
+  const done=new Set(S.done); const wl=LESSONS.filter(l=>l.tr==='w'), kl=LESSONS.filter(l=>l.tr==='k');
+  const wd=wl.filter(l=>done.has(l.id)).length, kd=kl.filter(l=>done.has(l.id)).length;
+  const next=LESSONS.find(l=>!done.has(l.id))||LESSONS[0];
+  const day=Math.floor(Date.now()/864e5); const pick=LESSONS[day%LESSONS.length];
+  const pct=(wd+kd)/LESSONS.length, C=2*Math.PI*34;
+  const card=(l,i)=>`<button class="lcard" data-id="${l.id}"><div class="cover">${l.cover()}<span class="no">${String(i+1).padStart(2,'0')}</span>${done.has(l.id)?'<span class="ok">✓</span>':''}</div><div class="meta"><span class="t">${l.t}</span><span class="s">${l.s}</span></div></button>`;
+  views.learn.innerHTML=`<div class="stack">
+    <div class="hero ${next.tr==='k'?'k':''}"><canvas id="viz-hero"></canvas>
+      <div class="row between" style="align-items:flex-start"><div><span class="eyebrow">Weiter lernen</span><div class="hero-title" style="margin-top:6px">${next.t}</div></div>
+        <svg class="ring" viewBox="0 0 84 84">${gradDefs('rg','#9B8CFF','#FFB347')}<circle cx="42" cy="42" r="34" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="8"/><circle cx="42" cy="42" r="34" fill="none" stroke="url(#rg)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${C*pct} ${C}" transform="rotate(-90 42 42)"/><text x="42" y="47" text-anchor="middle" font-size="16">${Math.round(pct*100)}%</text></svg></div>
+      <div class="hero-bottom"><button class="btn primary" id="h-go"><svg class="ic" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>Lektion starten</button>
+        <div class="memo-day"><span class="eyebrow">Eselsbrücke des Tages</span><p>${pick.memo}</p></div></div>
+    </div>
+    <div class="rail-h"><h2><i></i>Westlich</h2><span class="pill">${wd} / ${wl.length}</span></div>
+    <div class="rail">${wl.map(card).join('')}</div>
+    <div class="rail-h k"><h2><i></i>Karnatisch</h2><span class="pill">${kd} / ${kl.length}</span></div>
+    <div class="rail k">${kl.map(card).join('')}</div>
+    <div class="row" style="gap:10px">
+      <button class="card" data-go="piano" style="flex:1 1 150px;text-align:left;padding:14px"><span class="eyebrow">Werkzeug</span><b style="font-family:var(--f-d)">Klavier & 72 Ragas</b></button>
+      <button class="card" data-go="ear" style="flex:1 1 150px;text-align:left;padding:14px"><span class="eyebrow">Training</span><b style="font-family:var(--f-d)">Gehör schulen</b></button>
+    </div>
+    <div class="card" style="gap:10px"><span class="eyebrow">Backup</span>
+      <p class="muted" style="font-size:.88rem">Dein Fortschritt liegt nur auf diesem Gerät. Sichere ihn ab und zu als Datei, zum Beispiel in iCloud Drive.</p>
+      <div class="row"><button class="btn" id="bk-exp">Exportieren</button><label class="btn" for="bk-imp" style="cursor:pointer">Importieren</label><input type="file" id="bk-imp" accept="application/json,.json" hidden></div>
+      <p class="hint" id="bk-msg" aria-live="polite"></p></div>
+  </div>`;
+  views.learn.querySelectorAll('.lcard').forEach(b=>b.addEventListener('click',()=>openLesson(b.dataset.id)));
+  views.learn.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.go)));
+  $('#h-go').onclick=()=>openLesson(next.id);
+  $('#bk-exp').onclick=exportData;
+  $('#bk-imp').onchange=e=>{const f=e.target.files[0]; if(f) importData(f); e.target.value='';};
+  heroViz=Visualizer($('#viz-hero'),{bars:40,colors:next.tr==='k'?['rgba(255,179,71,.55)','rgba(255,106,77,.55)']:['rgba(155,140,255,.5)','rgba(79,195,255,.5)']});
+}
+
+/* ---------- Backup ---------- */
+function bkMsg(t){const m=$('#bk-msg'); if(m) m.textContent=t;}
+function exportData(){
+  const name=`sakala-backup-${new Date().toISOString().slice(0,10)}.json`;
+  const data=JSON.stringify({app:'sakala',version:1,exported:new Date().toISOString(),state:S},null,2);
+  const file=new File([data],name,{type:'application/json'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    navigator.share({files:[file],title:'Sakala Backup'}).then(()=>bkMsg('Backup erstellt: '+name)).catch(()=>bkMsg('Export abgebrochen.'));return;
+  }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(file); a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  bkMsg('Backup gespeichert: '+name+'. Falls nichts passiert, öffne die App über GitHub Pages statt im Claude-Fenster.');
+}
+function importData(f){
+  const r=new FileReader();
+  r.onload=()=>{ try{
+      const j=JSON.parse(r.result); if(j.app!=='sakala'||!j.state||!Array.isArray(j.state.done)) throw new Error('format');
+      S=Object.assign({done:[],label:'intl'},j.state); save(); renderLearn(); bkMsg(`Import erfolgreich: ${S.done.length} Lektionen erledigt.`);
+    }catch(e){ bkMsg('Diese Datei ist kein Sakala-Backup. Wähl eine Datei, die mit «sakala-backup» beginnt.'); } };
+  r.readAsText(f);
+}
+function circleSVG(){
+  const maj=['C','G','D','A','E','H','Fis','Des','As','Es','B','F'], min=['a','e','h','fis','cis','gis','dis','b','f','c','g','d'];
+  const acc=['0','1♯','2♯','3♯','4♯','5♯','6♯','5♭','4♭','3♭','2♭','1♭'], pcs=[0,7,2,9,4,11,6,1,8,3,10,5];
+  const cx=170,cy=170,R=160,ri=60; let s=`<svg viewBox="0 0 340 340" role="img" aria-label="Quintenzirkel">${gradDefs('cf')}`;
+  const pt=(rad,a)=>[cx+rad*Math.sin(a),cy-rad*Math.cos(a)];
+  for(let i=0;i<12;i++){
+    const a0=(i-.5)*Math.PI/6+.012,a1=(i+.5)*Math.PI/6-.012;
+    const [x0,y0]=pt(R,a0),[x1,y1]=pt(R,a1),[x2,y2]=pt(ri,a1),[x3,y3]=pt(ri,a0);
+    s+=`<path class="cseg" data-i="${i}" d="M${x0},${y0} A${R},${R} 0 0 1 ${x1},${y1} L${x2},${y2} A${ri},${ri} 0 0 0 ${x3},${y3} Z" fill="${i===0?'rgba(255,255,255,.12)':i<7?'rgba(155,140,255,.10)':'rgba(79,195,255,.08)'}" stroke="rgba(255,255,255,.1)" style="cursor:pointer"/>`;
+    const a=i*Math.PI/6; const [mx,my]=pt(136,a),[nx,ny]=pt(84,a),[ax,ay]=pt(111,a);
+    s+=`<text x="${mx}" y="${my+6}" text-anchor="middle" font-family="Unbounded" font-weight="800" font-size="16" fill="#F3F3FA" pointer-events="none">${maj[i]}</text>`;
+    s+=`<text x="${ax}" y="${ay+4}" text-anchor="middle" font-family="JetBrains Mono" font-weight="700" font-size="10" fill="#9B8CFF" pointer-events="none">${acc[i]}</text>`;
+    s+=`<text x="${nx}" y="${ny+5}" text-anchor="middle" font-family="Manrope" font-weight="700" font-size="13" fill="#9598B4" pointer-events="none">${min[i]}</text>`;
+  }
+  s+=`<circle cx="${cx}" cy="${cy}" r="${ri-6}" fill="url(#cf)" opacity=".9"/><text x="${cx}" y="${cy-2}" text-anchor="middle" font-family="Unbounded" font-weight="800" font-size="13" fill="#0A0B14" id="c-center">Tippen</text><text x="${cx}" y="${cy+15}" text-anchor="middle" font-family="Manrope" font-weight="800" font-size="10" fill="#0A0B14" id="c-sub">Dur aussen · Moll innen</text></svg>`;
+  return {svg:s,maj,min,acc,pcs};
+}
+
+function openLesson(id){
+  const L=LESSONS.find(l=>l.id===id); const isK=L.tr==='k';
+  const idx=LESSONS.filter(l=>l.tr===L.tr).indexOf(L)+1;
+  stopSeq(); Mic.stop(); Drone.stop();
+  const v=views.lesson; v.className='view'+(isK?' k':'');
+  const circ=L.circle?circleSVG():null; const nextL=LESSONS[LESSONS.indexOf(L)+1];
+  v.innerHTML=`<div class="stack">
+    <button class="back" id="l-back">← Übersicht</button>
+    <div class="lhero"><div class="art">${circ?circ.svg:L.cover()}</div><div><span class="eyebrow">${isK?'Karnatisch':'Westlich'} · Lektion ${idx}</span><h2 style="margin-top:6px">${L.t}</h2></div></div>
+    ${circ?`<p class="fb" id="c-out" style="text-align:center">Tippe auf eine Tonart, um den Akkord zu hören.</p>`:''}
+    <div class="prose">${L.body}</div>
+    ${L.intervals?`<div class="ivl" id="ivl">${INTV.map(([n,nm,sg])=>`<button data-n="${n}"><span class="ht">${n}</span><span><span class="nm">${nm}<span class="muted" style="font-weight:600;font-size:.75rem">${n} HT</span></span><span class="sg">♪ ${sg}</span><span class="bar" style="display:block"><span style="width:${n/12*100}%"></span></span></span></button>`).join('')}</div>`:''}
+    ${L.fig?`<div class="card">${L.fig()}</div>`:''}
+    ${L.after?`<div class="prose">${L.after}</div>`:''}
+    <div class="memo"><div class="bulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg></div><div><span class="eyebrow">Eselsbrücke</span><p>${L.memo}</p>${L.memo2?`<p class="sm" style="margin-top:8px">${L.memo2}</p>`:''}</div></div>
+    <div class="kbwrap"><div class="kb" id="kb-lesson"></div></div>
+    ${L.demos.length?`<div class="row" id="l-demos">${L.demos.map((d,i)=>`<button class="chip" data-i="${i}"><span class="dot"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3.5v17l15-8.5z"/></svg></span>${d.l}</button>`).join('')}</div>`:''}
+    ${L.talamLink?`<button class="btn primary" id="l-talam" style="align-self:flex-start">Zum Talam-Trainer →</button>`:''}
+    <div class="card quiz glow"><span class="eyebrow">Kurzer Check</span><h3 style="font-size:1.05rem">${L.q.q}</h3>
+      <div class="opts">${L.q.o.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}</div><p class="fb" id="q-fb" aria-live="polite"></p></div>
+    ${nextL?`<button class="lcard ${nextL.tr==='k'?'k':''}" id="l-next" style="flex-direction:row;align-items:center"><div class="cover" style="width:110px;aspect-ratio:1;flex:none">${nextL.cover()}</div><div class="meta"><span class="eyebrow">Als Nächstes</span><span class="t">${nextL.t}</span><span class="s">${nextL.s}</span></div></button>`:''}
+  </div>`;
+  const kb=Keyboard(v.querySelector('#kb-lesson'),{mode:()=>isK?'swara':(S.label==='swara'?'intl':S.label)});
+  v.querySelector('#l-back').onclick=()=>show('learn');
+  if(nextL) v.querySelector('#l-next').onclick=()=>openLesson(nextL.id);
+  const tl=v.querySelector('#l-talam'); if(tl) tl.onclick=()=>show('talam');
+  if(L.demos[0]) applyDemo(kb,L.demos[0],false);
+  const exb=v.querySelector('.exb'); if(exb) setupExBrowser(exb,kb);
+  v.querySelectorAll('#l-demos .chip').forEach(b=>b.onclick=()=>applyDemo(kb,L.demos[+b.dataset.i],true));
+  v.querySelectorAll('#ivl button').forEach(b=>b.onclick=()=>{const n=+b.dataset.n;v.querySelectorAll('#ivl button').forEach(x=>x.classList.toggle('play',x===b));kb.light([60,60+n],60);playSeq(kb,[60,60+n,[60,60+n]],.55);});
+  v.querySelectorAll('[data-janya]').forEach(b=>b.onclick=()=>{const [n,off,sw]=JANYA_LIST[+b.dataset.janya];const names={};off.forEach((o,k)=>names[60+o]=sw[k]);names[72]='Ṡ';kb.light(off.map(x=>60+x).concat(72),60,names);playSeq(kb,scaleSeq(60,off));});
+  v.querySelectorAll('[data-mela]').forEach(b=>b.onclick=()=>applyDemo(kb,{mela:+b.dataset.mela},true));
+  v.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{const i=+b.dataset.mode;const r=60+[0,2,4,5,7,9,11][i];const off=Object.values(SCALES)[[0,3,4,5,6,1,7][i]];kb.light(off.map(x=>r+x).concat(r+12),r);playSeq(kb,scaleSeq(r,off));});
+  if(circ){
+    v.querySelectorAll('.cseg').forEach(p=>p.addEventListener('click',()=>{
+      const i=+p.dataset.i; v.querySelectorAll('.cseg').forEach(q=>q.setAttribute('stroke',q===p?'#9B8CFF':'rgba(255,255,255,.1)'));
+      v.querySelectorAll('.cseg').forEach(q=>q.setAttribute('stroke-width',q===p?'2.5':'1'));
+      let r=60+circ.pcs[i]; if(r>66) r-=12; const ch=tri(r,[0,4,7]); kb.light(ch,r); playSeq(kb,[r,r+4,r+7,ch],.22);
+      v.querySelector('#c-center').textContent=circ.maj[i]+'-Dur'; v.querySelector('#c-sub').textContent=(circ.acc[i]==='0'?'keine Vorzeichen':circ.acc[i])+' · '+circ.min[i]+'-Moll';
+      v.querySelector('#c-out').innerHTML=`<b>${circ.maj[i]}-Dur</b> · ${circ.acc[i]==='0'?'keine Vorzeichen':circ.acc[i]} · Parallele: <b>${circ.min[i]}-Moll</b>`;
+    }));
+  }
+  v.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i, ok=i===L.q.a; const fb=v.querySelector('#q-fb');
+    v.querySelectorAll('.opt').forEach(x=>x.classList.remove('right','wrong'));
+    b.classList.add(ok?'right':'wrong'); if(!ok) v.querySelectorAll('.opt')[L.q.a].classList.add('right');
+    fb.className='fb '+(ok?'ok':'no'); fb.textContent=(ok?'Richtig! ':'Nicht ganz. ')+L.q.e;
+    if(ok&&!S.done.includes(L.id)){S.done.push(L.id);save();hdr();}
+  });
+  for(const [k,el] of Object.entries(views)) el.hidden=(k!=='lesson'); window.scrollTo(0,0);
+}
+function applyDemo(kb,d,play){
+  if(d.fn){ if(d.light) kb.light(d.light,d.root??null,d.names||null); if(play) d.fn(kb); return; }
+  if(d.mela){ const M=mela(d.mela); const ms=M.off.map(x=>60+x).concat(72); const names={}; M.sw.forEach((s,i)=>names[60+M.off[i]]=s); names[72]='Ṡ';
+    kb.light(ms,60,names); if(play) playSeq(kb,scaleSeq(60,M.off)); return; }
+  kb.light(d.light||[],d.root??null,d.names||null);
+  if(play) playSeq(kb,d.seq,d.step??.34);
+}
+
+/* ---------- Piano ---------- */
+const P={mode:'scale'};
+const pr=$('#p-root'),ps=$('#p-scale'),pc=$('#p-chord'),pg=$('#p-raga'),pl=$('#p-label');
+NAMES.intl.forEach((n,i)=>pr.add(new Option(`${n} / ${NAMES.de[i]}`,i)));
+Object.keys(SCALES).forEach(k=>ps.add(new Option(k,k)));
+Object.keys(CHORDS).forEach(k=>pc.add(new Option(k,k)));
+for(let n=1;n<=72;n++) pg.add(new Option(`${n}${MELA_NAMES[n]?' · '+MELA_NAMES[n]:''}`,n));
+Object.keys(JANYA).forEach(k=>pg.add(new Option(k,'j:'+k)));
+pg.value='15'; pl.value=S.label;
+const kbP=Keyboard($('#kb-piano'),{mode:()=>pl.value,sa:()=>+pr.value});
+const vizP=Visualizer($('#viz-piano'),{bars:56});
+function current(){
+  const root=60+(+pr.value), rn=NAMES.intl[+pr.value];
+  if(P.mode==='scale'){const off=SCALES[ps.value];return {root,off,title:`${rn} ${ps.value}`,note:SCALE_NOTE[ps.value]}}
+  if(P.mode==='chord'){const off=CHORDS[pc.value];return {root,off,chord:true,title:`${rn} ${pc.value}`,note:CHORD_NOTE[pc.value]}}
+  const v=pg.value; let M;
+  if(v.startsWith('j:')){const J=JANYA[v.slice(2)];M={sw:J.sw,off:J.off,title:v.slice(2).replace(' (Janya)',''),note:J.note}}
+  else {const m=mela(+v);M={sw:m.sw,off:m.off,title:m.name||`Melakarta ${m.n}`,num:m.n,note:`Chakra ${Math.floor((m.n-1)/6)+1}: ${m.chakra}. ${m.n<=36?'Shuddha Madhyamam (M1)':'Prati Madhyamam (M2)'}.`}}
+  const names={}; M.sw.forEach((s,i)=>names[root+M.off[i]]=s); names[root+12]='Ṡ';
+  return {root,off:M.off,names,title:M.title,num:M.num,note:M.note,sw:M.sw,raga:true};
+}
+function updatePiano(){
+  ['scale','chord','raga'].forEach(m=>$(`#p-${m}-l`).hidden=P.mode!==m);
+  views.piano.classList.toggle('k',P.mode==='raga');
+  vizP.setColors(P.mode==='raga'?['#FFB347','#FF6A4D']:['#9B8CFF','#4FC3FF']);
+  const c=current(); const ms=c.off.map(x=>c.root+x); if(!c.chord) ms.push(c.root+12);
+  kbP.light(ms,c.root,c.names);
+  const nameArr=(pl.value==='swara'?NAMES.intl:NAMES[pl.value]);
+  const wl=Array(12).fill(''); if(c.raga) c.off.forEach((o,i)=>wl[o]=c.sw[i]); else for(let i=0;i<12;i++) wl[i]=pl.value==='swara'?SW12[i]:nameArr[(i+c.root)%12];
+  $('#p-wheel').innerHTML=wheel(c.off,{labels:wl,show:'on',size:220});
+  $('#p-title').textContent=c.title; $('#p-sub').textContent=ms.map(m=>nameArr[m%12]).join(' · ');
+  const wm=c.raga?westernMatch(c.off):null;
+  $('#p-info').innerHTML=`<div class="row">${c.num?`<span class="pill acc">Nr. ${c.num}</span>`:''}${wm?`<span class="pill">≈ ${wm}</span>`:''}${c.chord?`<span class="pill">${c.off.slice(1).map((x,i)=>x-c.off[i]).join(' + ')} Halbtöne</span>`:''}</div>
+    <h3 style="font-size:1.1rem">${c.title}</h3>${c.raga?`<p class="notes-line" style="color:var(--acc)">${c.sw.join(' ')} Ṡ</p>`:''}<p class="muted" style="font-size:.92rem">${c.note||''}</p>`;
+  $('#p-steps').innerHTML=c.chord?'':steps(c.off);
+  if(window.trP) trP.reset();
+}
+var trP=Trainer($('#p-trainer'),{kb:kbP,source:()=>{const c=current();const notes=c.chord?c.off.map(x=>c.root+x):scaleSeq(c.root,c.off);return {notes,labels:notes.map(m=>kbP.name(m))};}});
+document.querySelectorAll('#pmode button').forEach(b=>b.onclick=()=>{P.mode=b.dataset.m;document.querySelectorAll('#pmode button').forEach(x=>x.setAttribute('aria-pressed',x===b));updatePiano();});
+[pr,ps,pc,pg].forEach(el=>el.onchange=updatePiano);
+pl.onchange=()=>{S.label=pl.value;save();updatePiano();};
+$('#p-play').onclick=()=>{const c=current(); if(c.chord){const ch=c.off.map(x=>c.root+x);playSeq(kbP,[...ch,ch],.28)} else playSeq(kbP,scaleSeq(c.root,c.off));};
+$('#p-clear').onclick=()=>kbP.clear();
+
+/* ---------- Ear training ---------- */
+const E={mode:'int',lvl:'easy',cur:null,streak:0,ok:0,n:0,answered:false};
+const kbE=Keyboard($('#kb-ear'),{from:48,to:72});
+function eOptions(){
+  if(E.mode==='int'){const set=E.lvl==='easy'?[3,4,5,7,12]:INTV.map(x=>x[0]);return INTV.filter(x=>set.includes(x[0])).map(x=>({k:x[0],l:x[1],x:`Merk-Lied: ${x[2]}`}));}
+  if(E.mode==='chord'){const set=E.lvl==='easy'?['Dur','Moll']:['Dur','Moll','Vermindert','Übermässig','Sus4','Dominant 7'];return set.map(k=>({k,l:k,x:CHORD_NOTE[k]}));}
+  const set=E.lvl==='easy'?[['Dur (Ionisch)','Dur · Shankarabharanam'],['Natürliches Moll (Äolisch)','Moll · Natabhairavi']]:[['Dur (Ionisch)','Dur · Shankarabharanam'],['Natürliches Moll (Äolisch)','Moll · Natabhairavi'],['Dorisch','Dorisch · Kharaharapriya'],['Phrygisch','Phrygisch · Hanumatodi'],['Lydisch','Lydisch · Kalyani'],['Doppelharmonisch Dur','Mayamalavagowla']];
+  return set.map(([k,l])=>({k,l,x:SCALE_NOTE[k]}));
+}
+function eRender(){$('#e-ans').innerHTML=eOptions().map(o=>`<button class="opt" data-k="${o.k}">${o.l}</button>`).join('');$('#e-ans').querySelectorAll('.opt').forEach(b=>b.onclick=()=>eAnswer(b));}
+function eNew(){
+  const opts=eOptions(); const o=opts[Math.floor(Math.random()*opts.length)];
+  const root=48+Math.floor(Math.random()*(E.mode==='int'?12:10));
+  E.cur={o,root}; E.answered=false; kbE.clear(); $('#e-fb').className='fb'; $('#e-fb').textContent='Was hörst du?'; eRender(); ePlay();
+}
+function ePlay(){
+  if(!E.cur) return eNew(); const {o,root}=E.cur;
+  if(E.mode==='int') playSeq(null,[root,root+o.k,[root,root+o.k]],.6);
+  else if(E.mode==='chord'){const ch=CHORDS[o.k].map(x=>root+x);playSeq(null,[ch,...ch,ch],.45);}
+  else playSeq(null,SCALES[o.k].map(x=>root+x).concat(root+12),.32);
+}
+function eAnswer(b){
+  if(!E.cur||E.answered) return; E.answered=true;
+  const ok=String(E.cur.o.k)===b.dataset.k; E.n++; if(ok){E.ok++;E.streak++}else E.streak=0;
+  b.classList.add(ok?'right':'wrong'); if(!ok) [...$('#e-ans').children].find(x=>x.dataset.k===String(E.cur.o.k)).classList.add('right');
+  const fb=$('#e-fb'); fb.className='fb '+(ok?'ok':'no'); fb.textContent=(ok?'Richtig: ':'Es war: ')+E.cur.o.l+'. '+E.cur.o.x;
+  $('#e-streak').textContent=E.streak; $('#e-ok').textContent=E.ok; $('#e-rate').textContent=Math.round(E.ok/E.n*100)+'%';
+  const {o,root}=E.cur; const ms=E.mode==='int'?[root,root+o.k]:E.mode==='chord'?CHORDS[o.k].map(x=>root+x):SCALES[o.k].map(x=>root+x).concat(root+12);
+  kbE.light(ms,root);
+}
+document.querySelectorAll('#emode button').forEach(b=>b.onclick=()=>{E.mode=b.dataset.m;E.cur=null;document.querySelectorAll('#emode button').forEach(x=>x.setAttribute('aria-pressed',x===b));eRender();$('#e-fb').textContent='Tippe auf Play.';kbE.clear();});
+document.querySelectorAll('#elev button').forEach(b=>b.onclick=()=>{E.lvl=b.dataset.l;E.cur=null;document.querySelectorAll('#elev button').forEach(x=>x.setAttribute('aria-pressed',x===b));eRender();});
+$('#e-new').onclick=()=>E.cur&&!E.answered?ePlay():eNew(); $('#e-again').onclick=ePlay; $('#e-next').onclick=eNew; eRender();
+
+/* ---------- Talam ---------- */
+EX.forEach(e=>$('#t-sarali').add(new Option(e.name,e.id)));
+const kbT=Keyboard($('#kb-talam'),{mode:()=>'swara',sa:()=>0});
+kbT.light([60,61,64,65,67,68,71,72],60,MMG_NAMES);
+const T={on:false,timer:null,next:0,beat:0,speed:1,noteIdx:0,uiT:[]};
+function drawDial(b){$('#t-dial').innerHTML=talamSVG(b,{size:300});}
+drawDial(-1);
+$('#t-bpm').oninput=e=>$('#t-bpm-v').textContent=e.target.value;
+document.querySelectorAll('#t-speed button').forEach(b=>b.onclick=()=>{T.speed=+b.dataset.s;document.querySelectorAll('#t-speed button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
+$('#t-sarali').onchange=()=>{T.noteIdx=0;};
+function scheduleBeat(t){
+  const b=T.beat; click(t,[0,4,6].includes(b));
+  const sel=$('#t-sarali').value, spb=60/+$('#t-bpm').value;
+  if(sel!==''){const seq=exNotes(sel); for(let k=0;k<T.speed;k++){const m=seq[T.noteIdx%seq.length]; T.noteIdx++; if(m==null) continue; const tt=t+k*spb/T.speed; tone(m,tt,Math.min(.6,spb/T.speed*1.3),.5); T.uiT.push(setTimeout(()=>kbT.hit(m,180),(tt-A.ctx.currentTime)*1000));}}
+  T.uiT.push(setTimeout(()=>drawDial(b),(t-A.ctx.currentTime)*1000));
+  T.beat=(b+1)%8;
+}
+function talamLoop(){ while(T.next<A.ctx.currentTime+.12){ scheduleBeat(T.next); T.next+=60/+$('#t-bpm').value; } }
+function startTalam(){ const c=ac(); if(!c) return; T.on=true; T.beat=0; T.noteIdx=0; T.next=c.currentTime+.08; talamLoop(); T.timer=setInterval(talamLoop,25); $('#t-go span').textContent='Stopp'; }
+function stopTalam(){ if(!T.on) return; T.on=false; clearInterval(T.timer); T.uiT.forEach(clearTimeout); T.uiT=[]; drawDial(-1); $('#t-go span').textContent='Start'; }
+$('#t-go').onclick=()=>T.on?stopTalam():startTalam();
+
+/* ---------- Boot ---------- */
+renderLearn(); updatePiano();
+</script>
+
+<script>
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "Sakala – Swara trifft Skala",
+  "short_name": "Sakala",
+  "description": "Musiktheorie, Piano und Raga für Producer",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08090F",
+  "theme_color": "#08090F",
+  "lang": "de",
+  "icons": [
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
