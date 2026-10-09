@@ -1,5 +1,5 @@
 // Sakala Service Worker: App offline verfügbar, Updates beim nächsten Start
-const CACHE = 'sakala-v3';
+const CACHE = 'sakala-v4';
 const CORE = ['./', './index.html', './manifest.json', './icon-512.png'];
 
 self.addEventListener('install', e => {

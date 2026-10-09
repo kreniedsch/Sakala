@@ -271,6 +271,27 @@ input[type=range]{width:100%;accent-color:var(--k1)}
 /* inversions */
 .inv-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 
+/* intro */
+#intro{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:radial-gradient(600px 420px at 50% 42%,rgba(155,140,255,.22),transparent 65%),radial-gradient(500px 360px at 50% 70%,rgba(255,179,71,.12),transparent 60%),var(--bg);transition:opacity .5s ease,visibility .5s;cursor:pointer}
+#intro.out{opacity:0;visibility:hidden}
+#intro .wrap-i{display:flex;flex-direction:column;align-items:center;gap:18px}
+#intro svg{width:132px;height:132px;overflow:visible}
+#intro .tile{transform-origin:20px 20px;animation:iTile .7s cubic-bezier(.2,1.4,.4,1) both}
+#intro .bk{animation:iKey .45s cubic-bezier(.3,1.5,.5,1) both}
+#intro .bk:nth-of-type(2){animation-delay:.35s}#intro .bk:nth-of-type(3){animation-delay:.47s}#intro .bk:nth-of-type(4){animation-delay:.59s}
+#intro .wk{animation:iFlash .6s ease both}
+#intro .wk:nth-of-type(5){animation-delay:.8s}#intro .wk:nth-of-type(6){animation-delay:.92s}
+#intro .halo{transform-origin:20px 20px;animation:iHalo 1.2s ease-out .75s both}
+#intro .word{font-family:var(--f-d);font-weight:800;font-size:2.6rem;letter-spacing:-.03em;display:flex}
+#intro .word span{display:inline-block;animation:iLetter .5s cubic-bezier(.2,1.2,.4,1) both;background:linear-gradient(90deg,#B7ABFF,#FFC77A);-webkit-background-clip:text;background-clip:text;color:transparent}
+#intro .itag{font-family:var(--f-m);font-size:.72rem;letter-spacing:.32em;color:var(--muted);animation:iFade .6s ease 1.25s both}
+@keyframes iTile{from{transform:scale(.4) rotate(-12deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes iKey{from{transform:translateY(-14px);opacity:0}to{transform:none;opacity:1}}
+@keyframes iFlash{0%{opacity:0}50%{opacity:1;fill:#FFB347}100%{opacity:1}}
+@keyframes iHalo{from{transform:scale(.9);opacity:.8}to{transform:scale(1.9);opacity:0}}
+@keyframes iLetter{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
+@keyframes iFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#intro *{animation:none!important}}
 [hidden],.view[hidden]{display:none!important}
 #p-wheel{width:100%}
 #p-wheel svg{display:block;width:100%;height:auto;max-width:220px;margin:0 auto}
@@ -278,6 +299,18 @@ input[type=range]{width:100%;accent-color:var(--k1)}
 @media (max-width:440px){ .quiz .opts{grid-template-columns:1fr} .split{grid-template-columns:1fr} .split > :first-child{max-width:210px;margin:0 auto} .hero-title{font-size:1.45rem} .ctrls{grid-template-columns:1fr 1fr} }
 </style>
 
+<div id="intro" aria-hidden="true">
+  <div class="wrap-i">
+    <svg viewBox="0 0 40 40"><defs><linearGradient id="ilg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9B8CFF"/><stop offset="1" stop-color="#FFB347"/></linearGradient></defs>
+      <rect class="halo" width="40" height="40" rx="12" fill="none" stroke="url(#ilg)" stroke-width="1.2"/>
+      <g class="tile"><rect width="40" height="40" rx="12" fill="url(#ilg)"/>
+        <rect class="bk" x="8" y="9" width="6" height="22" rx="2" fill="#0A0B14"/><rect class="bk" x="17" y="9" width="6" height="22" rx="2" fill="#0A0B14"/><rect class="bk" x="26" y="9" width="6" height="22" rx="2" fill="#0A0B14"/>
+        <rect class="wk" x="12" y="9" width="4" height="13" rx="1.5" fill="#fff"/><rect class="wk" x="24" y="9" width="4" height="13" rx="1.5" fill="#fff"/></g>
+    </svg>
+    <div class="word">Sakala</div>
+    <div class="itag">SWARA TRIFFT SKALA</div>
+  </div>
+</div>
 <div class="wrap" id="app">
   <header class="top">
     <div class="logo">
@@ -1618,6 +1651,13 @@ function talamLoop(){ while(T.next<A.ctx.currentTime+.12){ scheduleBeat(T.next);
 function startTalam(){ const c=ac(); if(!c) return; T.on=true; T.beat=0; T.noteIdx=0; T.next=c.currentTime+.08; talamLoop(); T.timer=setInterval(talamLoop,25); $('#t-go span').textContent='Stopp'; }
 function stopTalam(){ if(!T.on) return; T.on=false; clearInterval(T.timer); T.uiT.forEach(clearTimeout); T.uiT=[]; drawDial(-1); $('#t-go span').textContent='Start'; }
 $('#t-go').onclick=()=>T.on?stopTalam():startTalam();
+
+/* ---------- Intro ---------- */
+(()=>{const el=document.getElementById('intro'); if(!el) return;
+  el.querySelector('.word').innerHTML=[...'Sakala'].map((c,i)=>`<span style="animation-delay:${.85+i*.07}s">${c}</span>`).join('');
+  const done=()=>{if(el.classList.contains('out'))return; el.classList.add('out'); setTimeout(()=>el.remove(),600);};
+  el.addEventListener('click',done); setTimeout(done,RM?500:2300);
+})();
 
 /* ---------- Boot ---------- */
 renderLearn(); updatePiano();
