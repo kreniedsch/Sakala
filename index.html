@@ -750,7 +750,20 @@ function Trainer(el,{kb,source,onIndex=()=>{},pts=2,onWin=null}){
   };
   return {reset,start};
 }
-const INTV=[[1,'kleine Sekunde','Der weisse Hai'],[2,'grosse Sekunde','Alle meine Entchen'],[3,'kleine Terz','Kuckuck, Kuckuck (abwärts)'],[4,'grosse Terz','Oh When the Saints'],[5,'Quarte','O Tannenbaum'],[6,'Tritonus','Die Simpsons'],[7,'Quinte','Star Wars'],[8,'kleine Sexte','The Entertainer (E zum hohen C)'],[9,'grosse Sexte','My Bonnie Is Over the Ocean'],[10,'kleine Septime','Star Trek (Originalserie)'],[11,'grosse Septime','Take On Me (Refrain)'],[12,'Oktave','Somewhere Over the Rainbow']];
+/* Intervalle: [Halbtöne, Name, Merk-Lied, Liedanfang (nur gemeinfreie/traditionelle Melodien) ] */
+const INTV=[
+ [1,'kleine Sekunde','Für Elise (abwärts) · Der weisse Hai','E5:.5 D#5:.5 E5:.5 D#5:.5 E5:.5 B4:.5 D5:.5 C5:.5 A4:2'],
+ [2,'grosse Sekunde','Alle meine Entchen','C4:1 D4:1 E4:1 F4:1 G4:2 G4:2'],
+ [3,'kleine Terz','Kuckuck, Kuckuck (abwärts)','G4:1.5 E4:1.5 G4:1.5 E4:1.5'],
+ [4,'grosse Terz','Oh When the Saints','C4:1 E4:1 F4:1 G4:3'],
+ [5,'Quarte','O Tannenbaum','D4:1 G4:.75 G4:.25 G4:1.5 A4:.5 B4:.75 B4:.25 B4:1.5'],
+ [6,'Tritonus','Die Simpsons (Titelmelodie)',null],
+ [7,'Quinte','Morgen kommt der Weihnachtsmann · Star Wars','C4:1 C4:1 G4:1 G4:1 A4:1 A4:1 G4:2'],
+ [8,'kleine Sexte','The Entertainer (E zum hohen C)','D4:.5 D#4:.5 E4:.5 C5:1 E4:.5 C5:1 E4:.5 C5:2'],
+ [9,'grosse Sexte','My Bonnie Is Over the Ocean','G4:1 E5:1.5 D5:.5 C5:1 D5:1 C5:1 A4:1 G4:1 E4:2'],
+ [10,'kleine Septime','Star Trek (Originalserie)',null],
+ [11,'grosse Septime','Take On Me (Refrain)',null],
+ [12,'Oktave','Somewhere Over the Rainbow',null]];
 
 /* ---------- SVG graphics ---------- */
 let GID=0;
@@ -1393,7 +1406,7 @@ function openLesson(id){
     <div class="lhero"><div class="art">${circ?circ.svg:L.cover()}</div><div><span class="eyebrow">${isK?'Karnatisch':'Westlich'} · Lektion ${idx}</span><h2 style="margin-top:6px">${L.t}</h2></div></div>
     ${circ?`<p class="fb" id="c-out" style="text-align:center">Tippe auf eine Tonart, um den Akkord zu hören.</p>`:''}
     <div class="prose">${L.body}</div>
-    ${L.intervals?`<div class="ivl" id="ivl">${INTV.map(([n,nm,sg])=>`<button data-n="${n}"><span class="ht">${n}</span><span><span class="nm">${nm}<span class="muted" style="font-weight:600;font-size:.75rem">${n} HT</span></span><span class="sg">♪ ${sg}</span><span class="bar" style="display:block"><span style="width:${n/12*100}%"></span></span></span></button>`).join('')}</div>`:''}
+    ${L.intervals?`<div class="ivl" id="ivl">${INTV.map(([n,nm,sg,song])=>`<button data-n="${n}"><span class="ht">${n}</span><span><span class="nm">${nm}<span class="muted" style="font-weight:600;font-size:.75rem">${n} HT</span></span><span class="sg">♪ ${sg}</span><span class="sg" style="display:block;color:${song?'var(--acc)':'var(--dim)'};font-weight:700;font-size:.72rem;margin-top:2px">${song?'▶ Intervall + Liedanfang':'▶ Intervall · Lied im Kopf summen'}</span><span class="bar" style="display:block"><span style="width:${n/12*100}%"></span></span></span></button>`).join('')}</div>`:''}
     ${L.fig?`<div class="card">${L.fig()}</div>`:''}
     ${L.after?`<div class="prose">${L.after}</div>`:''}
     <div class="memo"><div class="bulb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg></div><div><span class="eyebrow">Eselsbrücke</span><p>${L.memo}</p>${L.memo2?`<p class="sm" style="margin-top:8px">${L.memo2}</p>`:''}</div></div>
@@ -1411,7 +1424,12 @@ function openLesson(id){
   if(L.demos[0]) applyDemo(kb,L.demos[0],false);
   const exb=v.querySelector('.exb'); if(exb) setupExBrowser(exb,kb);
   v.querySelectorAll('#l-demos .chip').forEach(b=>b.onclick=()=>applyDemo(kb,L.demos[+b.dataset.i],true));
-  v.querySelectorAll('#ivl button').forEach(b=>b.onclick=()=>{const n=+b.dataset.n;v.querySelectorAll('#ivl button').forEach(x=>x.classList.toggle('play',x===b));kb.light([60,60+n],60);playSeq(kb,[60,60+n,[60,60+n]],.55);});
+  v.querySelectorAll('#ivl button').forEach(b=>b.onclick=()=>{const n=+b.dataset.n, it=INTV.find(x=>x[0]===n);
+    v.querySelectorAll('#ivl button').forEach(x=>x.classList.toggle('play',x===b)); kb.light([60,60+n],60);
+    const evs=[{t:0,d:1,m:60},{t:1,d:1.4,m:60+n}];
+    if(it[3]){ parseNotes(it[3]).forEach(e=>evs.push({t:e.t+3,d:e.d,m:e.m})); }
+    else { evs.push({t:3,d:1,m:60+n},{t:4,d:1.4,m:60}); }
+    playEvents(kb,evs,it[3]?110:100);});
   v.querySelectorAll('[data-janya]').forEach(b=>b.onclick=()=>{const [n,off,sw]=JANYA_LIST[+b.dataset.janya];const names={};off.forEach((o,k)=>names[60+o]=sw[k]);names[72]='Ṡ';kb.light(off.map(x=>60+x).concat(72),60,names);playSeq(kb,scaleSeq(60,off));});
   v.querySelectorAll('[data-mela]').forEach(b=>b.onclick=()=>applyDemo(kb,{mela:+b.dataset.mela},true));
   v.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{const i=+b.dataset.mode;const r=60+[0,2,4,5,7,9,11][i];const off=Object.values(SCALES)[[0,3,4,5,6,1,7][i]];kb.light(off.map(x=>r+x).concat(r+12),r);playSeq(kb,scaleSeq(r,off));});
