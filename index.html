@@ -422,7 +422,7 @@ input[type=range]{width:100%;accent-color:var(--k1)}
   <section class="view stack" id="v-voice" hidden>
     <div><span class="eyebrow">Gesang</span><h2 style="margin-top:4px">Stimme</h2></div>
     <div class="seg" id="vc-mode" role="group" aria-label="Übung" style="align-self:flex-start">
-      <button data-m="free" aria-pressed="true">Frei</button><button data-m="range" aria-pressed="false">Umfang</button><button data-m="hit" aria-pressed="false">Ton treffen</button><button data-m="warm" aria-pressed="false">Einsingen</button><button data-m="hold" aria-pressed="false">Halten</button><button data-m="sapa" aria-pressed="false">Sa–Pa</button><button data-m="sarali" aria-pressed="false">Sarali</button>
+      <button data-m="free" aria-pressed="true">Frei</button><button data-m="range" aria-pressed="false">Umfang</button><button data-m="hit" aria-pressed="false">Ton treffen</button><button data-m="warm" aria-pressed="false">Einsingen</button><button data-m="hold" aria-pressed="false">Halten</button><button data-m="siren" aria-pressed="false">Sirene</button><button data-m="tone" aria-pressed="false">Klang</button><button data-m="key" aria-pressed="false">Tonart</button><button data-m="sapa" aria-pressed="false">Sa–Pa</button><button data-m="sarali" aria-pressed="false">Sarali</button>
     </div>
     <div class="card glow vc-stage">
       <div class="vc-top"><div style="min-width:0"><div class="vc-note" id="vc-note">–</div><div class="vc-cents" id="vc-cents">Mikrofon aus</div></div>
@@ -1820,7 +1820,7 @@ S.voice=Object.assign({lo:48,hi:67,set:false,best:0,sa:0},S.voice||{});
 const VTYPES=[['Bass',40,64],['Bariton',45,69],['Tenor',48,72],['Alt',53,77],['Mezzosopran',57,81],['Sopran',60,84]];
 const nn=m=>NAMES[S.label==='de'?'de':'intl'][((Math.round(m)%12)+12)%12]+(Math.floor(Math.round(m)/12)-1);
 const vNear=(m,t)=>((m-t)%12+18)%12-6; /* Abstand in Halbtönen, Oktave egal */
-const V={mode:'free',hist:[],cur:null,raw:[],target:null,label:null,center:57,onPitch:null,lastT:0,raf:0,mic:false};
+const V={marks:[],mode:'free',hist:[],cur:null,raw:[],target:null,label:null,center:57,onPitch:null,lastT:0,raf:0,mic:false};
 function vType(){const {lo,hi}=S.voice;let best=VTYPES[0],bc=1e9;VTYPES.forEach(t=>{const c=Math.abs(lo-t[1])+Math.abs(hi-t[2]);if(c<bc){bc=c;best=t;}});return best[0];}
 function vRangeLabel(){$('#vc-range').textContent=S.voice.set?`${nn(S.voice.lo)} – ${nn(S.voice.hi)} · ${vType()}`:'Umfang noch nicht gemessen';}
 function vFrame(f){
@@ -1863,9 +1863,12 @@ function vDraw(){
     const mm=V.target!=null?V.target+vNear(h.m,V.target):h.m; const yy=y(mm), ok=V.target!=null&&Math.abs(mm-V.target)<.4;
     if(prev){x.strokeStyle=ok?'#43E39A':col; x.beginPath(); x.moveTo(prev[0],prev[1]); x.lineTo(xx,yy); x.stroke();} prev=[xx,yy]; });
   if(prev){x.fillStyle='#fff'; x.shadowColor=col; x.shadowBlur=14*d; x.beginPath(); x.arc(prev[0],prev[1],5*d,0,7); x.fill(); x.shadowBlur=0;}
+  (V.marks||[]).forEach(k=>{const xx=W-(now-k.t)/4000*(W-34*d); if(xx<34*d) return; x.strokeStyle='#FF6B7A'; x.lineWidth=2.5*d; x.beginPath(); x.arc(xx,y(k.m),9*d,0,7); x.stroke();});
 }
 function vStable(){const now=performance.now(); const v=V.hist.filter(h=>now-h.t<900&&h.m!=null).map(h=>h.m).sort((a,b)=>a-b);
   if(v.length<10) return null; const sp=v[Math.floor(v.length*.9)]-v[Math.floor(v.length*.1)]; return sp>1.2?null:Math.round(v[Math.floor(v.length/2)]);}
+function vBreakZone(){const b=(S.voice.breaks||[]).slice().sort((a,c)=>a-c); if(b.length<2) return 'noch offen';
+  const med=b[Math.floor(b.length/2)], lo=b[Math.floor(b.length*.25)], hi=b[Math.floor(b.length*.75)]; return lo===hi?`um ${nn(med)}`:`${nn(lo)}–${nn(hi)}`;}
 function vSaMidi(){const pc=S.voice.sa; let m=S.voice.lo; while(((m%12)+12)%12!==pc) m++; if(m+12>S.voice.hi+3&&m-12>=S.voice.lo-3) m-=12; return m;}
 function vSteps(el,labels,cur,done){el.innerHTML=labels.map((l,i)=>`<span class="vc-step ${i===cur?'cur':''} ${i<done?'ok':''}">${l}</span>`).join('');}
 /* Folge von Zieltönen: Ton halten → nächster Ton */
@@ -1930,6 +1933,97 @@ const VMODES={
        $('#vo-stab').textContent=`±${Math.round(sd)} ct`; if(t>(S.voice.best||0)){S.voice.best=t;save();$('#vo-best').textContent=t.toFixed(1).replace('.',',')+' s';$('#vo-msg').className='fb ok';$('#vo-msg').textContent='Neuer Rekord!';} else {$('#vo-msg').className='fb';$('#vo-msg').textContent=`${t.toFixed(1).replace('.',',')} Sekunden gehalten.`;}
        if(t>=5) practice(1); V.target=null;}}
      $('#vo-sec').textContent=t.toFixed(1).replace('.',',')+' s'; }; },
+ siren(P){ let run=false,pts=[],ev=[],lastV=null,gapT=0,sung=0,silent=0,max=-1,min=999;
+   P.innerHTML=`<span class="eyebrow">Sirene · Brüche finden</span><h3>Gleite durch deinen ganzen Umfang</h3>
+   <p class="muted">Leise auf «u», «ng» oder mit Lippenflattern vom tiefsten bequemen Ton langsam nach oben gleiten und wieder zurück, wie eine Sirene. Die App markiert rot, wo die Stimme springt oder aussetzt. Dort liegt dein Übergang (Passaggio) von der Brust- in die Kopfstimme.</p>
+   <div class="row"><button class="btn primary" id="vn-go">Start</button><span class="pill" id="vn-state">bereit</span></div>
+   <div class="vc-grid"><div class="card" style="padding:12px"><span class="eyebrow">Höchster Ton</span><div class="vc-big" id="vn-hi">–</div></div><div class="card" style="padding:12px"><span class="eyebrow">Brüche</span><div class="vc-big" id="vn-n">–</div></div><div class="card" style="padding:12px"><span class="eyebrow">Dein Übergang</span><div class="vc-big" style="font-size:1.4rem" id="vn-zone">${vBreakZone()}</div></div></div>
+   <p class="fb" id="vn-msg" aria-live="polite"></p>
+   <div class="card" style="padding:14px;gap:8px"><span class="eyebrow">Warum es oben kratzt</span>
+   <p class="muted" style="font-size:.92rem">Meist wird die Bruststimme zu weit nach oben «gezogen»: mehr Druck, mehr Lautstärke, der Kehlkopf steigt. Irgendwann kippt die Stimme oder kratzt. Die Lösung ist fast immer <b>weniger</b>, nicht mehr:</p>
+   <ul class="muted" style="margin:0;padding-left:1.2em;display:grid;gap:4px;font-size:.92rem"><li><b>Leiser werden</b>, je höher du gehst. Volumen gibt später der Mix.</li><li><b>Vokale schmaler machen:</b> «a» Richtung «ö» oder «u», «i» Richtung «ü».</li><li><b>Leicht kippen lassen:</b> Die Stimme darf oben dünner werden. Mit der Zeit wird der Übergang glatter (Mischstimme).</li><li><b>Erst einsingen</b>, nie kalt in die Höhe.</li><li><b>Song anpassen:</b> 1–2 Halbtöne tiefer wirkt oft Wunder, siehe «Tonart».</li></ul>
+   <p class="hint">Kratzt es nach dem Singen weiter, Pause machen. Hält Heiserkeit länger als zwei Wochen an, zu HNO oder Logopädie gehen.</p></div>`;
+   const fin=()=>{ run=false; $('#vn-go').textContent='Start'; $('#vn-state').textContent='fertig';
+     if(sung<1){$('#vn-msg').className='fb no';$('#vn-msg').textContent='Kein Gleiten erkannt. Mikrofon an? Sing etwas lauter und gleite langsam.';return;}
+     $('#vn-hi').textContent=nn(max); $('#vn-n').textContent=ev.length;
+     S.voice.breaks=(S.voice.breaks||[]).concat(ev.map(e=>Math.round(e.m))).slice(-30); if(max>S.voice.hi&&max-S.voice.hi<=3){} save(); $('#vn-zone').textContent=vBreakZone();
+     $('#vn-msg').className='fb '+(ev.length?'no':'ok');
+     $('#vn-msg').textContent=ev.length?`${ev.length} ${ev.length===1?'Bruch':'Brüche'} bei ${[...new Set(ev.map(e=>nn(e.m)))].join(', ')}. Wiederhole die Sirene genau dort, noch leiser und auf «u».`:`Durchgehend ohne Bruch von ${nn(min)} bis ${nn(max)}. Stark!`;
+     practice(ev.length?1:2); };
+   $('#vn-go').onclick=()=>{ if(run){fin();return;} run=true;pts=[];ev=[];V.marks=[];lastV=null;gapT=0;sung=0;silent=0;max=-1;min=999;
+     $('#vn-go').textContent='Stopp'; $('#vn-state').textContent='hört zu …'; $('#vn-msg').textContent=''; };
+   let pend=null;
+   V.onPitch=(m,dt)=>{ if(!run) return; const now=performance.now();
+     if(m!=null&&(m<34||m>88)) m=null; /* ausserhalb der Stimme: Messfehler */
+     if(m==null){ pend=null; if(lastV){gapT+=dt;} if(sung>1.5){silent+=dt; if(silent>1.4) fin();} return; }
+     silent=0; sung+=dt;
+     if(lastV&&gapT===0&&Math.abs(m-lastV.m)>=2.5){ /* möglicher Sprung: erst nach 3 bestätigten Messungen zählen */
+       if(pend&&Math.abs(m-pend.m)<1.5){ pend.n++; pend.m=m; if(pend.n>=3){ ev.push({m:lastV.m,type:'Sprung'}); V.marks.push({t:now,m:(pend.m0+lastV.m)/2}); lastV={m,t:now}; pend=null; max=Math.max(max,m); min=Math.min(min,m); $('#vn-hi').textContent=nn(max);} }
+       else pend={m,m0:m,n:1};
+       return; }
+     pend=null;
+     if(lastV&&gapT>.05&&gapT<.6&&Math.abs(m-lastV.m)<5){ev.push({m:lastV.m,type:'Aussetzer'});V.marks.push({t:now,m:lastV.m});}
+     max=Math.max(max,m); min=Math.min(min,m);
+     gapT=0; lastV={m,t:now}; $('#vn-hi').textContent=nn(max); }; },
+ tone(P){ let meas=false,acc=[],ema=null;
+   P.innerHTML=`<span class="eyebrow">Klang öffnen</span><h3>Von «verstopft» zu offen</h3>
+   <p class="muted">Der Balken misst den <b>Glanz</b> deiner Stimme: wie viel Energie im Bereich 2,2–3,4 kHz liegt (Sängerformant, «Ring») im Vergleich zu den dumpfen Tiefmitten (300–900 Hz). Verstopft oder gedrückt klingende Stimmen haben dort wenig. Sing ein bequemes «a» und probier die Übungen. Der Wert soll steigen, ohne dass du lauter wirst.</p>
+   <div style="display:grid;gap:6px"><div class="row between"><span class="eyebrow">Glanz</span><span class="notes-line" id="vt-val">–</span></div>
+     <div class="vc-bar" style="height:16px"><span id="vt-bar" style="background:linear-gradient(90deg,#9B8CFF,#FFB347)"></span></div>
+     <div class="row between muted" style="font-size:.72rem"><span>dumpf</span><span>offen, klingend</span></div></div>
+   <div class="row"><button class="btn primary" id="vt-m">3 Sekunden messen</button><span class="pill" id="vt-best">${S.voice.ring!=null?'Bester Wert: '+S.voice.ring.toFixed(1)+' dB':'noch keine Messung'}</span></div>
+   <p class="fb" id="vt-msg" aria-live="polite"></p>
+   <div class="vc-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+    ${[['Gähn-Seufzer','Gähnen, bis der Rachen weit wird, dann auf «haaa» von oben nach unten seufzen. Öffnet den Rachenraum.'],
+      ['NG → A','«ng» summen wie am Ende von «Ring», halten, dann den Mund zu «ngaaa» öffnen. Der Klang bleibt vorne und wird klar.'],
+      ['Strohhalm','1–2 Minuten durch einen Strohhalm summen und Sirenen machen, dann ohne singen. Entlastet die Stimmlippen, die Stimme läuft freier.'],
+      ['Zunge & Kiefer','Zunge herausstrecken und «ja-ja-ja» singen, Kiefer locker ausmassieren. Eine verspannte Zungenwurzel macht den Klang dumpf.'],
+      ['Vorne denken','Summen auf «mmm», bis Lippen und Nase vibrieren, dann auf «mmma» öffnen. Den Klang dort lassen, nicht nach hinten «schlucken».']].map(([t,d])=>`<div class="card" style="padding:12px;gap:4px"><b style="font-family:var(--f-d);font-size:.9rem">${t}</b><span class="muted" style="font-size:.86rem">${d}</span></div>`).join('')}
+   </div>
+   <p class="hint">Ist die Nase wirklich zu (Schnupfen, Allergie), klingt jede Stimme verstopft. Dann lieber pausieren. Der Wert hängt auch von Mikrofon, Abstand und Raum ab, vergleiche also immer unter gleichen Bedingungen.</p>`;
+   const spec=()=>{ if(!Mic.an) return null; const a=Mic.an, n=a.frequencyBinCount, arr=new Float32Array(n); a.getFloatFrequencyData(arr); const bw=A.ctx.sampleRate/a.fftSize;
+     const pw=(lo,hi)=>{let s=0;for(let i=Math.floor(lo/bw);i<=Math.ceil(hi/bw)&&i<n;i++) s+=Math.pow(10,arr[i]/10);return s;};
+     const lm=pw(300,900), rg=pw(2200,3400); return lm>0?10*Math.log10(rg/lm):null; };
+   const show=v=>{const pct=Math.max(0,Math.min(100,(v+35)/30*100)); $('#vt-bar').style.width=pct+'%'; $('#vt-val').textContent=v<-40?'unter −40 dB':v.toFixed(1)+' dB';};
+   $('#vt-m').onclick=()=>{ if(!V.mic){$('#vt-msg').className='fb no';$('#vt-msg').textContent='Schalte zuerst das Mikrofon ein.';return;} acc=[];meas=true;$('#vt-msg').className='fb';$('#vt-msg').textContent='Sing jetzt 3 Sekunden ein ruhiges «a» …';
+     setTimeout(()=>{ meas=false; if(acc.length<20){$('#vt-msg').className='fb no';$('#vt-msg').textContent='Zu wenig Stimme erkannt. Bitte etwas lauter und länger singen.';return;}
+       acc.sort((a,b)=>a-b); const v=acc[Math.floor(acc.length/2)]; const prev=S.voice.ring;
+       if(prev==null||v>prev){S.voice.ring=v;save();} $('#vt-best').textContent='Bester Wert: '+S.voice.ring.toFixed(1)+' dB';
+       $('#vt-msg').className='fb ok'; $('#vt-msg').textContent=`Gemessen: ${v.toFixed(1)} dB.`+(prev!=null?` ${v>prev?`Besser als dein bisher bester Wert (${prev.toFixed(1)} dB)!`:`Bester Wert bleibt ${prev.toFixed(1)} dB.`}`:' Mach eine Übung und miss dann nochmal.'); practice(1); },3000); };
+   V.onPitch=(m)=>{ if(m==null) return; const v=spec(); if(v==null||!isFinite(v)) return; ema=ema==null?v:ema*.85+v*.15; show(ema); if(meas) acc.push(v); }; },
+ key(P){ const K=[]; NAMES.intl.forEach((n,i)=>{K.push([i,'Dur',`${NAMES.de[i]}-Dur`]);K.push([i,'Moll',`${NAMES.de[i].toLowerCase()}-Moll`]);});
+   const notes=[]; for(let m=36;m<=84;m++) notes.push(m);
+   const opt=(sel)=>notes.map(m=>`<option value="${m}" ${m===sel?'selected':''}>${nn(m)}</option>`).join('');
+   const st=S.voice.song||{key:'11-Moll',hi:Math.min(84,S.voice.hi+1),lo:Math.max(36,S.voice.lo+3)};
+   P.innerHTML=`<span class="eyebrow">Tonart-Finder</span><h3>In welcher Tonart klingst du am besten?</h3>
+   <p class="muted">Gib die Tonart des Songs ein und den höchsten und tiefsten Ton deiner Melodie. Wenn du die Töne nicht kennst, sing sie einfach und tippe auf «gesungen übernehmen». Die App vergleicht mit deinem gemessenen Umfang (${nn(S.voice.lo)}–${nn(S.voice.hi)}) und schlägt die beste Tonart vor.</p>
+   ${S.voice.set?'':'<p class="fb no">Miss zuerst unter «Umfang» deinen Stimmumfang, sonst rechnet die App mit Standardwerten.</p>'}
+   <div class="ctrls"><label class="f">Tonart des Songs<select id="vk-key">${K.map(([i,q,l])=>`<option value="${i}-${q}" ${st.key===i+'-'+q?'selected':''}>${l}</option>`).join('')}</select></label><span></span>
+     <label class="f">Höchster Melodie-Ton<select id="vk-hi">${opt(st.hi)}</select></label><label class="f">Tiefster Melodie-Ton<select id="vk-lo">${opt(st.lo)}</select></label></div>
+   <div class="row"><button class="btn" id="vk-shi">Höchsten gesungen übernehmen</button><button class="btn" id="vk-slo">Tiefsten gesungen übernehmen</button></div>
+   <p class="fb" id="vk-msg" aria-live="polite"></p><div class="stack" style="gap:8px" id="vk-res"></div>
+   <div class="card" style="padding:14px;gap:6px"><span class="eyebrow">Umsetzen</span><ul class="muted" style="margin:0;padding-left:1.2em;display:grid;gap:4px;font-size:.92rem">
+    <li><b>Suno:</b> den Song in der neuen Tonart neu generieren (Tonart im Stil-Prompt angeben, z. B. «A minor»).</li>
+    <li><b>Stems transponieren:</b> im DAW alle Stems gleich verschieben. ±1–2 Halbtöne klingen meist natürlich, bei mehr entstehen hörbare Artefakte. Wenn möglich «formant-erhaltend» wählen.</li>
+    <li><b>Auto-Tune</b> danach auf die neue Tonart stellen.</li></ul></div>`;
+   const calc=()=>{ const [r,q]=$('#vk-key').value.split('-'), root=+r, hi=+$('#vk-hi').value, lo=+$('#vk-lo').value;
+     S.voice.song={key:$('#vk-key').value,hi,lo}; save();
+     if(hi<lo){$('#vk-res').innerHTML='';$('#vk-msg').className='fb no';$('#vk-msg').textContent='Der höchste Ton liegt unter dem tiefsten, bitte prüfen.';return;}
+     const cLo=S.voice.lo+1, cHi=S.voice.hi-2, span=hi-lo, room=cHi-cLo;
+     const res=[]; for(let t=-7;t<=7;t++){ const nh=hi+t, nl=lo+t, oh=Math.max(0,nh-cHi), ol=Math.max(0,cLo-nl); res.push({t,oh,ol,score:10*(oh+ol)+Math.abs(t)*1.2+.4*Math.abs((cHi-1)-nh)}); }
+     res.sort((a,b)=>a.score-b.score);
+     const kname=t=>{const i=((root+t)%12+12)%12; return q==='Dur'?`${NAMES.de[i]}-Dur`:`${NAMES.de[i].toLowerCase()}-Moll`;};
+     const cur=res.find(x=>x.t===0);
+     $('#vk-msg').className='fb '+(cur.oh||cur.ol?'no':'ok');
+     $('#vk-msg').textContent=span>room?`Die Melodie umfasst ${span} Halbtöne, dein bequemer Bereich ${room}. Ganz passt das in keiner Tonart. Wähl die beste Variante unten und sing einzelne Spitzen eine Oktave tiefer.`
+       :cur.oh?`In der Originaltonart liegt der höchste Ton ${cur.oh} ${cur.oh===1?'Halbton':'Halbtöne'} über deinem bequemen Bereich. Darum kratzt es.`
+       :cur.ol?`In der Originaltonart liegt der tiefste Ton ${cur.ol} ${cur.ol===1?'Halbton':'Halbtöne'} unter deinem bequemen Bereich.`:'Die Originaltonart passt gut zu deiner Stimme.';
+     $('#vk-res').innerHTML=res.slice(0,3).map((x,i)=>`<div class="prog"><div style="min-width:0"><b>${kname(x.t)}</b> <span class="muted" style="font-size:.8rem">${x.t===0?'Original':(x.t>0?'+':'')+x.t+' Halbtöne'}</span><div class="ch">${nn(lo+x.t)} – ${nn(hi+x.t)} · ${x.oh||x.ol?(x.oh?`${x.oh} HT zu hoch`:`${x.ol} HT zu tief`):'passt'}${i===0?' · Empfehlung':''}</div></div>
+       <button class="iconbtn" data-hear="${hi+x.t}" aria-label="Höchsten Ton anhören"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></button><span></span></div>`).join('');
+     $('#vk-res').querySelectorAll('[data-hear]').forEach(b=>b.onclick=()=>tone(+b.dataset.hear,undefined,1.4,.6)); };
+   ['#vk-key','#vk-hi','#vk-lo'].forEach(q=>$(q).onchange=calc);
+   const take=(w)=>{const n=vStable(); if(!V.mic||n==null){$('#vk-msg').className='fb no';$('#vk-msg').textContent=V.mic?'Halte den Ton etwa eine Sekunde ruhig und tippe dann.':'Schalte zuerst das Mikrofon ein.';return;} $(w==='hi'?'#vk-hi':'#vk-lo').value=Math.max(36,Math.min(84,n)); calc();};
+   $('#vk-shi').onclick=()=>take('hi'); $('#vk-slo').onclick=()=>take('lo'); calc(); },
  sapa(P){ const sel=`<select id="vs-sa">${NAMES.intl.map((n,i)=>`<option value="${i}" ${i===S.voice.sa?'selected':''}>${n}</option>`).join('')}</select>`;
    P.innerHTML=`<span class="eyebrow">Karnatisch</span><h3>Sa – Pa – Ṡa über der Tanpura</h3>
    <p class="muted">Die Grundübung jeder Sängerin und jedes Sängers: Sa, Pa und das hohe Ṡa je 3 Sekunden ruhig halten, getragen von der Tanpura. So schulst du dein Gehör für Shruti, die exakte Tonhöhe.</p>
@@ -1949,7 +2043,7 @@ const VMODES={
    $('#vl-go').onclick=()=>{const b=build(); $('#vl-msg').className='fb'; $('#vl-msg').textContent=`Sa liegt auf ${nn(b.notes[0])}. Los gehts!`;
      vFollow({notes:b.notes,labels:b.labels,hold:.2,tol:.5,stepsEl:$('#vl-steps'),barEl:$('#vl-bar'),onDone:()=>{$('#vl-msg').className='fb ok';$('#vl-msg').textContent='Übung komplett gesungen!';practice(3);}}); }; },
 };
-function vSetMode(m){ V.mode=m; V.target=null; V.label=null; V.onPitch=null; stopSeq();
+function vSetMode(m){ V.mode=m; V.target=null; V.label=null; V.onPitch=null; V.marks=[]; stopSeq();
   document.querySelectorAll('#vc-mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
   views.voice.classList.toggle('k',m==='sapa'||m==='sarali'); VMODES[m]($('#vc-panel')); vReadout(); }
 document.querySelectorAll('#vc-mode button').forEach(b=>b.onclick=()=>vSetMode(b.dataset.m));
