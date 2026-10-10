@@ -1466,6 +1466,7 @@ function renderLearn(){
       <p class="muted" style="font-size:.88rem">Dein Fortschritt liegt nur auf diesem Gerät. Sichere ihn ab und zu als Datei, zum Beispiel in iCloud Drive.</p>
       <div class="row"><button class="btn" id="bk-exp">Exportieren</button><label class="btn" for="bk-imp" style="cursor:pointer">Importieren</label><input type="file" id="bk-imp" accept="application/json,.json" hidden></div>
       <p class="hint" id="bk-msg" aria-live="polite"></p></div>
+    <p class="hint" style="text-align:center">Sakala · Version 8 · 11.10.2026</p>
   </div>`;
   views.learn.querySelectorAll('.lcard').forEach(b=>b.addEventListener('click',()=>openLesson(b.dataset.id)));
   views.learn.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.go)));
@@ -2101,7 +2102,10 @@ renderLearn(); updatePiano();
 </script>
 
 <script>
-if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+if('serviceWorker' in navigator){
+  addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+  let reloaded=false; navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(reloaded) return; reloaded=true; location.reload(); });
+}
 </script>
 </body>
 </html>
