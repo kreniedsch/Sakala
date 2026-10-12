@@ -1,7 +1,7 @@
 // Sakala Service Worker
 // Seite: zuerst aus dem Netz (neueste Version), offline aus dem Cache.
 // Übrige Dateien: aus dem Cache, im Hintergrund aktualisieren.
-const CACHE = 'sakala-v8';
+const CACHE = 'sakala-v9';
 const CORE = ['./', './index.html', './manifest.json', './icon-512.png'];
 
 self.addEventListener('install', e => {

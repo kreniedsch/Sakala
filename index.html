@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#08090F">
 <meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -41,7 +41,9 @@ img{max-width:100%}
 .k{--acc:var(--k1);--acc2:var(--k2)}
 .pr{--acc:#3EE0C8;--acc2:#7BB8FF}
 *{box-sizing:border-box}
-html,body{background:var(--bg)}
+html,body{background:var(--bg);touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{touch-action:manipulation}
+input,select,textarea{font-size:16px!important}
 body{color:var(--ink);font-family:var(--f-b);font-size:16px;line-height:1.55;-webkit-tap-highlight-color:transparent;
   background:radial-gradient(900px 500px at 85% -10%,rgba(155,140,255,.16),transparent 60%),radial-gradient(700px 400px at -10% 30%,rgba(255,179,71,.08),transparent 60%),var(--bg);background-attachment:fixed}
 .wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:18px 120px}
@@ -465,6 +467,13 @@ input[type=range]{width:100%;accent-color:var(--k1)}
   <button data-v="talam" class="kk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 12l4-4"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>Talam</button>
 </div></nav>
 
+<script>
+/* Zoom sperren: Doppeltipp, Pinch (iOS ignoriert user-scalable) */
+(function(){let last=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-last<350){e.preventDefault();}last=n;},{passive:false});
+['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+document.addEventListener('touchmove',e=>{if(e.touches.length>1)e.preventDefault();},{passive:false});})();
+</script>
 <script>
 /* ---------- Storage ---------- */
 const STORE='swara-skala-v1';
@@ -1466,7 +1475,7 @@ function renderLearn(){
       <p class="muted" style="font-size:.88rem">Dein Fortschritt liegt nur auf diesem Gerät. Sichere ihn ab und zu als Datei, zum Beispiel in iCloud Drive.</p>
       <div class="row"><button class="btn" id="bk-exp">Exportieren</button><label class="btn" for="bk-imp" style="cursor:pointer">Importieren</label><input type="file" id="bk-imp" accept="application/json,.json" hidden></div>
       <p class="hint" id="bk-msg" aria-live="polite"></p></div>
-    <p class="hint" style="text-align:center">Sakala · Version 8 · 11.10.2026</p>
+    <p class="hint" style="text-align:center">Sakala · Version 9 · 12.10.2026</p>
   </div>`;
   views.learn.querySelectorAll('.lcard').forEach(b=>b.addEventListener('click',()=>openLesson(b.dataset.id)));
   views.learn.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.go)));
@@ -2100,7 +2109,6 @@ $('#t-go').onclick=()=>T.on?stopTalam():startTalam();
 /* ---------- Boot ---------- */
 renderLearn(); updatePiano();
 </script>
-
 <script>
 if('serviceWorker' in navigator){
   addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
